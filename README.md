@@ -1,4 +1,4 @@
-#jenkins-dashboard
+# jenkins-dashboard
 
 A simple command-line tool for displaying a dashboard of the current Jenkins runs. This tool uses the Jenkins API to fetch data about running jobs and their status, and displays the data in a tabular format in the terminal.
 
