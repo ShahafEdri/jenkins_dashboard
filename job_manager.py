@@ -1,0 +1,65 @@
+import pickle
+from data_collector import DataCollector
+from config import config
+
+class JobManager:
+    def __init__(self, job_numbers_file='job_numbers.pickle'):
+        self.data_collector = DataCollector()
+        self._job_numbers_file = job_numbers_file
+        self._job_numbers = self._load_job_numbers()
+
+    def add_job_number(self, job_number):
+        self._job_numbers.add(job_number)
+        self._save_job_numbers()
+
+    def remove_job_number(self, job_number):
+        self._job_numbers.remove(job_number)
+        self._save_job_numbers()
+
+    def get_job_numbers(self):
+        return self._job_numbers
+
+    def prompt_for_job_number(self):
+        job_number = input("Enter the job number: ")
+        self.add_job_number(job_number)
+
+    def remove_job_number_prompt(self):
+        job_number = input("Enter the job number to remove: ")
+        self.remove_job_number(job_number)
+
+    def _save_job_numbers(self):
+        with open(self._job_numbers_file, 'wb') as f:
+            pickle.dump(self._job_numbers, f)
+
+    def _load_job_numbers(self):
+        try:
+            with open(self._job_numbers_file, 'rb') as f:
+                return set(pickle.load(f))
+        except FileNotFoundError:
+            return set()
+
+    def get_jobs_data(self):
+        
+        jobs_dict = {}
+        for job_number in self._job_numbers:
+            data_dict = self.data_collector.get_build_params(config["job_name"], job_number)
+            jobs_dict[job_number] = data_dict
+        return jobs_dict
+
+    def action_factory(self, action):
+        if action == 'add':
+            return self.add_job_number
+        elif action == 'remove':
+            return self.remove_job_number
+        else:
+            print("Invalid action")
+
+if __name__ == '__main__':
+    job_manager = JobManager()
+    job_manager.add_job_number(24282)
+    job_manager.add_job_number(24283)
+    job_manager.add_job_number(24284)
+    print(job_manager.get_job_numbers())
+    job_manager.remove_job_number(24284)
+    print(job_manager.get_job_numbers())
+    print(job_manager.get_jobs_data())

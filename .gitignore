@@ -1,0 +1,4 @@
+venv/
+*.pickle
+.vscode/
+__pycache__/

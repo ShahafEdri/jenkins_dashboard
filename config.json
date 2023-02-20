@@ -1,0 +1,4 @@
+{
+  "job_name": "request_runner",
+  "test_manager_url": "http://test-manager-dev:5000/"
+}
