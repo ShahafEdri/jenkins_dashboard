@@ -1,4 +1,9 @@
 {
   "job_name": "request_runner",
-  "test_manager_url": "http://test-manager-dev:5000/"
+  "test_manager_url": "http://test-manager-dev:5000/",
+  "job_info_picker": ["result", "inProgress", "duration", "timestamp", "displayName"],
+  "job_parameters_yaml_selector": {
+    "marker": ["execution", "marker"]
+  },
+  "job_parameters_display": ["result", "duration", "timestamp", "server", "marker"]
 }

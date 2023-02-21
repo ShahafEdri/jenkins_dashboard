@@ -1,0 +1,13 @@
+hold-on-failure
+/html/body/div[2]/div[1]/table/tbody/tr[2]/td[2]/text()[2]
+//*[@id="DataTables_Table_0"]/tbody/tr[2]/td[2]/text()[2]
+
+job_number
+/html/body/div[2]/div[1]/table/tbody/tr[2]/td[14]/a
+//*[@id="DataTables_Table_0"]/tbody/tr[2]/td[14]/a
+
+
+#DataTables_Table_0 > tbody > tr.failed.even
+document.querySelector("#DataTables_Table_0 > tbody > tr.failed.even")
+//*[@id="DataTables_Table_0"]/tbody/tr[2]
+/html/body/div[2]/div[1]/table/tbody/tr[2]

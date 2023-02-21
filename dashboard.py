@@ -10,12 +10,12 @@ class Dashboard:
         if jobs_data:
             for job_number, job_params in jobs_data.items():
                 job_row_data = [job_number]
-                for param in config['job_parameters']:
+                for param in config['job_parameters_display']:
                     job_row_data.append(job_params.get(param))
                 data.append(job_row_data)
 
         # Print the table
-        headers = ['job_number', *config["job_parameters"]]
+        headers = ['job_number', *config["job_parameters_display"]]
         stdscr.addstr(tabulate(data, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))+"\n")
 
 if __name__ == '__main__':

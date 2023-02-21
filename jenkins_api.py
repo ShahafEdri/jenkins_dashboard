@@ -3,7 +3,8 @@ import json
 import warnings
 from datetime import datetime, timedelta
 import os
-import re
+from config import config
+import yaml
 
 
 class JenkinsAPI:
@@ -27,4 +28,4 @@ class JenkinsAPI:
 
 if __name__ == "__main__":
     jenkins_api = JenkinsAPI(os.environ['JENKINS_URL'], os.environ['JENKINS_USER'], os.environ['JENKINS_TOKEN'])
-    print(jenkins_api.get_build_params('request_runner', 24282))
+    print(jenkins_api.get_job_info('request_runner', 24282))

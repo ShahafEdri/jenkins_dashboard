@@ -2,3 +2,4 @@ venv/
 *.pickle
 .vscode/
 __pycache__/
+*.bak
