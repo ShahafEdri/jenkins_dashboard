@@ -52,7 +52,7 @@ class App:
         # Add the current jobs table
         self.stdscr.addstr(1, 0, "Current jobs:\n")
         jobs_data = self.job_manager.get_jobs_data()
-        self.dashboard.show(self.stdscr, jobs_data)
+        self.dashboard.show(jobs_data=jobs_data, stdscr=self.stdscr)
 
         # Add the instructions to add/remove jobs
         self.stdscr.addstr("\n")

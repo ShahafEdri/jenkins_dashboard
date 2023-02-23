@@ -29,19 +29,30 @@ class DataCollector:
         info["build_number"] = build_number
 
     def _concat_hold_on_failure(self, info_dict):
-        if self._is_build_hold_on_failure_on_server(info_dict['server'], info_dict['displayName']):
+        if self._is_build_hold_on_failure_on_server(info_dict['server'], info_dict['build_number']):
             info_dict['server'] = f"{info_dict['server']}(HOF)"
 
     def _get_additional_params_from_yaml(self, info_dict):
-        yml_text = info_dict["actions"][1]["parameters"][1]["value"]
-        return yaml.safe_load(yml_text)
+        actions_list = info_dict["actions"]
+        # find "name": "ADDITIONAL_PARAMS" in actions_list which is a list of dicts
+        for action in actions_list:
+            if action.get("_class","") == "hudson.model.ParametersAction":
+                tmp_list = action["parameters"]
+        for action in tmp_list:
+            if action["name"] == "ADDITIONAL_PARAMS":
+                additional_params_yaml_text =  action["value"]
+        return yaml.safe_load(additional_params_yaml_text)
 
     def _parameters_picker(self, info_dict, additional_params):
         config["job_parameters_yaml_selector"]
-        for param, nest_path_list in config["job_parameters_yaml_selector"]:
+        for param, nest_path_list in config["job_parameters_yaml_selector"].items():
             info_dict[param] = additional_params
             for nest in nest_path_list:
-                info_dict[param] = info_dict[param][nest]
+                try:
+                    info_dict[param] = info_dict[param][nest]
+                except KeyError:
+                    info_dict[param] = None
+                    break
 
     def _get_parameters_from_jenkins_additional_params(self, info_dict):
         additional_params = self._get_additional_params_from_yaml(info_dict)
@@ -52,6 +63,7 @@ class DataCollector:
         self._assign_build_params(info, job_name, build_number)
         self._fix_params(info)
         self._concat_hold_on_failure(info)
+        self._get_parameters_from_jenkins_additional_params(info)
         params_list = config['job_parameters_display']
         info_dict = {param: info.get(param) for param in params_list}
         return info_dict

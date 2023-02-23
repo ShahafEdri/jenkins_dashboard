@@ -1,9 +1,11 @@
 {
   "job_name": "request_runner",
   "test_manager_url": "http://test-manager-dev:5000/",
-  "job_info_picker": ["result", "inProgress", "duration", "timestamp", "displayName"],
+  "job_info_picker": ["inProgress", "duration", "timestamp", "displayName", "result"],
   "job_parameters_yaml_selector": {
-    "marker": ["execution", "marker"]
+    "marker": ["execution", "marker"],
+    "validation_tests_branch": ["environment", "validation_tests", "branch"]
   },
-  "job_parameters_display": ["result", "duration", "timestamp", "server", "marker"]
+  "job_parameters_display": ["build_number", "duration", "timestamp", "server", "marker", "validation_tests_branch", "result"],
+  "job_parameters_display_headers": ["job #", "duration", "timestamp", "server", "marker", "validation_tests_branch", "result"]
 }
