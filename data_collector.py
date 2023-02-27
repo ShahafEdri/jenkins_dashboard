@@ -59,7 +59,8 @@ class DataCollector:
         self._parameters_picker(info_dict, additional_params)
 
     def get_build_params(self, job_name, build_number):
-        info_dict = self.jenkins_api.get_job_info(job_name, build_number)
+        # add catch exception
+        info_dict = self.jenkins_api.get_job_info(job_name=job_name, build_number=build_number)
         self._assign_build_params(info_dict, job_name, build_number)
         self._fix_params(info_dict)
         self._concat_hold_on_failure(info_dict)
