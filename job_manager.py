@@ -38,11 +38,14 @@ class JobManager:
         except FileNotFoundError:
             return set()
 
-    def get_jobs_data(self):
-        
+    def get_job_data(self, build_number, job_name=config['job_name']):
+        data_dict = self.data_collector.get_build_params(job_name, build_number)
+        return data_dict
+
+    def get_all_jobs_data(self, job_name=config['job_name']):
         jobs_dict = {}
         for job_number in self._job_numbers:
-            data_dict = self.data_collector.get_build_params(config["job_name"], job_number)
+            data_dict = self.get_job_data(job_number, job_name)
             jobs_dict[job_number] = data_dict
         return jobs_dict
 

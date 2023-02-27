@@ -36,11 +36,11 @@ class DataCollector:
         actions_list = info_dict["actions"]
         # find "name": "ADDITIONAL_PARAMS" in actions_list which is a list of dicts
         for action in actions_list:
-            if action.get("_class","") == "hudson.model.ParametersAction":
+            if action.get("_class", "") == "hudson.model.ParametersAction":
                 tmp_list = action["parameters"]
         for action in tmp_list:
             if action["name"] == "ADDITIONAL_PARAMS":
-                additional_params_yaml_text =  action["value"]
+                additional_params_yaml_text = action["value"]
         return yaml.safe_load(additional_params_yaml_text)
 
     def _parameters_picker(self, info_dict, additional_params):
@@ -59,13 +59,13 @@ class DataCollector:
         self._parameters_picker(info_dict, additional_params)
 
     def get_build_params(self, job_name, build_number):
-        info = self.jenkins_api.get_job_info(job_name, build_number)
-        self._assign_build_params(info, job_name, build_number)
-        self._fix_params(info)
-        self._concat_hold_on_failure(info)
-        self._get_parameters_from_jenkins_additional_params(info)
+        info_dict = self.jenkins_api.get_job_info(job_name, build_number)
+        self._assign_build_params(info_dict, job_name, build_number)
+        self._fix_params(info_dict)
+        self._concat_hold_on_failure(info_dict)
+        self._get_parameters_from_jenkins_additional_params(info_dict)
         params_list = config['job_parameters_display']
-        info_dict = {param: info.get(param) for param in params_list}
+        info_dict = {param: info_dict.get(param) for param in params_list}
         return info_dict
 
 

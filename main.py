@@ -2,26 +2,30 @@ import curses
 import time
 from dashboard import Dashboard
 from job_manager import JobManager
+from datetime import datetime, timedelta
 
 class App:
     def __init__(self, stdscr):
         self.stdscr = stdscr
         self.job_manager = JobManager()
-        self.dashboard = Dashboard()
+        self.dashboard = Dashboard(self.stdscr)
         self.run_flag = True
         self.waiting_for_input = False
         self.job_number = ""
         self.action = None
+        self.last_update = datetime.now()
+        self.jobs_data = self.job_manager.get_jobs_data()
 
+        
     def handle_input(self, c):
         if self.waiting_for_input:
-            if c == 27:  # ESC key
+            if c == curses.KEY_EXIT:  # ESC key
                 self.waiting_for_input = False
                 self.job_number = ""
                 self.action = None
-            elif c == 263:  # Backspace key
+            elif c == curses.KEY_BACKSPACE:  # Backspace key
                 self.job_number = self.job_number[:-1]
-            elif c == 10:  # Enter key
+            elif c == curses.KEY_ENTER:  # Enter key
                 self.waiting_for_input = False
                 if self.job_number:
                     self.job_manager.action_factory(self.action)(self.job_number)
@@ -51,8 +55,12 @@ class App:
 
         # Add the current jobs table
         self.stdscr.addstr(1, 0, "Current jobs:\n")
-        jobs_data = self.job_manager.get_jobs_data()
-        self.dashboard.show(jobs_data=jobs_data, stdscr=self.stdscr)
+
+        # once every 5 seconds, update the jobs data
+        if datetime.now() - self.last_update > timedelta(seconds=30):
+            self.last_update = datetime.now()
+            self.jobs_data = self.job_manager.get_jobs_data()
+        self.dashboard.show(jobs_data=self.jobs_data)
 
         # Add the instructions to add/remove jobs
         self.stdscr.addstr("\n")
@@ -78,7 +86,7 @@ class App:
             self.handle_input(c)
             self.render()
             self.stdscr.refresh()
-            curses.napms(100)  # Wait for 100 ms
+            curses.napms(20)  # Wait for 100 ms
 
 def main(stdscr):
     app = App(stdscr)

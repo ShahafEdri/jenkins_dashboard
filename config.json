@@ -6,6 +6,6 @@
     "marker": ["execution", "marker"],
     "validation_tests_branch": ["environment", "validation_tests", "branch"]
   },
-  "job_parameters_display": ["build_number", "duration", "timestamp", "server", "marker", "validation_tests_branch", "result"],
-  "job_parameters_display_headers": ["job #", "duration", "timestamp", "server", "marker", "validation_tests_branch", "result"]
+  "job_parameters_display": ["build_number", "validation_tests_branch", "marker", "server", "timestamp", "duration", "result"],
+  "job_parameters_display_headers": ["job #", "validation_tests_branch", "marker", "server", "timestamp", "duration", "result"]
 }
