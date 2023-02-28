@@ -48,7 +48,10 @@ class DataCollector:
         for action in tmp_list:
             if action["name"] == "ADDITIONAL_PARAMS":
                 additional_params_yaml_text = action["value"]
-        return yaml.safe_load(additional_params_yaml_text)
+        try:
+            return yaml.safe_load(additional_params_yaml_text)
+        except:
+            return None
 
     def _parameters_picker(self, info_dict, additional_params):
         config["job_parameters_yaml_selector"]
@@ -57,7 +60,7 @@ class DataCollector:
             for nest in nest_path_list:
                 try:
                     info_dict[param] = info_dict[param][nest]
-                except KeyError:
+                except (KeyError, TypeError):
                     info_dict[param] = None
                     break
 
