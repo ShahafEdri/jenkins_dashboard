@@ -15,7 +15,9 @@ class Dashboard:
                 for param in config['job_parameters_display']:
                     job_row_data.append(job_params.get(param))
                 data.append(job_row_data)
-        return data
+            return data
+        else:
+            return [["-"]*len(config['job_parameters_display_headers'])]
         
     def get_table_string(self, jobs_data):
         data = self._jobs_dict_to_list_of_lists(jobs_data)
