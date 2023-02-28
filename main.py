@@ -13,7 +13,6 @@ class App:
         self.run_flag = True
         self.input_text = ""
 
-
         self.action_factory_dict = {
             'add': self.job_manager.add_job_number,
             'remove': self.job_manager.remove_job_number,
@@ -35,7 +34,9 @@ class App:
 
     def handle_command(self, command):
         command_parts = command.split()
-        if command_parts[0] == "quit":
+        if command_parts == []:
+            pass
+        elif command_parts[0] == "quit":
             self.run_flag = False
         elif len(command_parts) == 2:
             job_number = command_parts[1]
@@ -43,21 +44,29 @@ class App:
             self.action_factory(action)(job_number)
 
     def render(self):
-        # Clear the screen
-        self.stdscr.clear()
 
-        # Add a header
-        self.stdscr.addstr(0, 0, " Job Manager ".center(curses.COLS, "="))
+        # Render UI
+        try:
+            # Clear the screen
+            self.stdscr.clear()
 
-        # Add the current jobs table
-        self.stdscr.addstr(1, 0, "Current jobs:\n")
-        jobs_data = self.job_manager.get_all_jobs_data()
-        self.dashboard.show(jobs_data=jobs_data)
+            # Add a header
+            self.stdscr.addstr(0, 0, " Job Manager ".center(curses.COLS, "="))
 
-        # Add the input prompt
-        self.stdscr.addstr(curses.LINES - 2, 0, f"you can {'/'.join(self.action_factory_dict.keys())} <job number> action")
-        self.stdscr.addstr(curses.LINES - 1, 0, "Command: " + self.input_text)
-        self.stdscr.refresh()
+            # Add the current jobs table
+            self.stdscr.addstr(1, 0, "Current jobs:\n")
+            jobs_data = self.job_manager.get_all_jobs_data()
+            self.dashboard.show(jobs_data=jobs_data)
+
+            # Add the input prompt
+            self.stdscr.addstr(curses.LINES - 2, 0, f"you can {'/'.join(self.action_factory_dict.keys())} <job number> action or quit to exit")
+            self.stdscr.addstr(curses.LINES - 1, 0, "Command: " + self.input_text)
+            self.stdscr.refresh()
+        except curses.error:
+            # Terminal has been resized
+            curses.resize_term(curses.LINES, curses.COLS)
+            self.stdscr.clear()
+
 
     def run(self):
         curses.curs_set(0)  # Hide the cursor
