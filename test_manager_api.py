@@ -22,13 +22,13 @@ class TestManagerAPI:
         chrome_options = Options()
         chrome_options.add_argument("--window-size=1920,1200")
         chrome_options.add_argument("--headless")  # run the browser in the background
-        driver = webdriver.Chrome(options=chrome_options, service=Service(ChromeDriverManager().install()))
-
         # failure_element_div_xpath = '//*[@id="DataTables_Table_0"]/tbody/tr[2]'
         failure_element_div_xpath = '/html/body/div[2]/div[1]/table/tbody/tr[2]/td[2]/font'
         job_number_xpath = '/html/body/div[2]/div[1]/table/tbody/tr[2]/td[14]/a'
 
         try:
+            driver = webdriver.Chrome(options=chrome_options, service=Service(ChromeDriverManager().install()))
+            # driver = webdriver.Chrome(options=chrome_options, executable_path="/usr/bin/chromedriver")
             # Get the URL
             url = f"{self.base_url_node}/{server}"
             driver.get(url)
