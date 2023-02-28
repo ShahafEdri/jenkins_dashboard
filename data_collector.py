@@ -32,11 +32,12 @@ class DataCollector:
         info["build_number"] = build_number
 
     def _concat_hold_on_failure(self, info_dict):
-        response = self._is_build_hold_on_failure_on_server(info_dict['server'], info_dict['build_number'])
-        if response==True:
-            info_dict['server'] = f"{info_dict['server']}(HOF)"
-        elif str(response)=="error":
-            info_dict['server'] = f"{info_dict['server']}*"
+        if info_dict['result'] == 'FAILURE':
+            response = self._is_build_hold_on_failure_on_server(info_dict['server'], info_dict['build_number'])
+            if response==True:
+                info_dict['server'] = f"{info_dict['server']}(HOF)"
+            elif str(response)=="error":
+                info_dict['server'] = f"{info_dict['server']}*"
 
     def _get_additional_params_from_yaml(self, info_dict):
         actions_list = info_dict["actions"]
