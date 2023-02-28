@@ -9,8 +9,8 @@ class JobManager:
         self._job_numbers = self._load_job_numbers()
 
     def add_job_number(self, job_number):
-        self._job_numbers.add(job_number)  # Add the job number to the set
-        self._job_numbers = sorted(self._job_numbers, reverse=True)  # Sort the job numbers
+        self._job_numbers.append(job_number)  # Add the job number to the set
+        self._job_numbers = sorted(self._job_numbers)  # Sort the job numbers
         self._save_job_numbers() # Save the job numbers to the file
 
     def remove_job_number(self, job_number):
@@ -20,14 +20,6 @@ class JobManager:
     def get_job_numbers(self):
         return self._job_numbers
 
-    def prompt_for_job_number(self):
-        job_number = input("Enter the job number: ")
-        self.add_job_number(job_number)
-
-    def remove_job_number_prompt(self):
-        job_number = input("Enter the job number to remove: ")
-        self.remove_job_number(job_number)
-
     def _save_job_numbers(self):
         with open(self._job_numbers_file, 'wb') as f:
             pickle.dump(self._job_numbers, f)
@@ -35,9 +27,9 @@ class JobManager:
     def _load_job_numbers(self):
         try:
             with open(self._job_numbers_file, 'rb') as f:
-                return set(pickle.load(f))
+                return list(pickle.load(f))
         except FileNotFoundError:
-            return set()
+            return list()
 
     def get_job_data(self, build_number, job_name=config['job_name']):
         data_dict = self.data_collector.get_build_params(job_name=job_name, build_number=build_number)
