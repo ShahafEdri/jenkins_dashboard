@@ -50,23 +50,26 @@ class App:
             # Clear the screen
             self.stdscr.clear()
 
-            # Add a header
-            self.stdscr.addstr(0, 0, " Job Manager ".center(curses.COLS, "="))
-
             # Add the current jobs table
             self.stdscr.addstr(1, 0, "Current jobs:\n")
             jobs_data = self.job_manager.get_all_jobs_data()
-            self.dashboard.show(jobs_data=jobs_data)
+            t_height, t_width = self.dashboard.show(jobs_data=jobs_data)
+            spacing_rows = 2
+
+            # Add a header
+            header_rows = 2
+            header = " Job Manager ".center(t_width, "=")
+            self.stdscr.addstr(0, 0, header)
 
             # Add the input prompt
-            self.stdscr.addstr(curses.LINES - 2, 0, f"you can {'/'.join(self.action_factory_dict.keys())} <job number> action or quit to exit")
-            self.stdscr.addstr(curses.LINES - 1, 0, "Command: " + self.input_text)
-            self.stdscr.refresh()
+            footer_rows =  2
+            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 2, 0, f"you can {'/'.join(self.action_factory_dict.keys())} <job number> action or quit to exit")
+            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 1, 0, "Command: " + self.input_text)
         except curses.error:
             # Terminal has been resized
             curses.resize_term(curses.LINES, curses.COLS)
             self.stdscr.clear()
-
+        self.stdscr.refresh()
 
     def run(self):
         curses.curs_set(0)  # Hide the cursor

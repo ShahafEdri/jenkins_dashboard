@@ -30,6 +30,8 @@ class Dashboard:
             self.stdscr.addstr(table_str)
         else:
             print(table_str)
+        # return table_height and table_width
+        return len(table_str.splitlines()), len(table_str.splitlines()[0])
 
 if __name__ == '__main__':
     job_manager = JobManager()
