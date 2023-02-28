@@ -10,7 +10,7 @@ class JobManager:
 
     def add_job_number(self, job_number):
         self._job_numbers.add(job_number)  # Add the job number to the set
-        self._job_numbers = sorted(self._job_numbers)  # Sort the job numbers
+        self._job_numbers = sorted(self._job_numbers, reverse=True)  # Sort the job numbers
         self._save_job_numbers() # Save the job numbers to the file
 
     def remove_job_number(self, job_number):
