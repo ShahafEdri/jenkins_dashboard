@@ -29,7 +29,7 @@ class App:
         elif c in [curses.KEY_ENTER, 10]:  # Enter key
             self.handle_command(self.input_text)
             self.input_text = ""
-        elif c != -1:  # Regular key
+        elif 32 <= c <= 126:  # Regular key
             self.input_text += chr(c)
 
     def handle_command(self, command):

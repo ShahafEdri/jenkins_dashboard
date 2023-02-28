@@ -20,7 +20,10 @@ class DataCollector:
         info_dict['timestamp'] = datetime.fromtimestamp(info_dict['timestamp']/1000).strftime('%Y-%m-%d %H:%M')
         info_dict['duration'] = datetime.fromtimestamp(info_dict['duration']/1000).strftime('%H:%M:%S')
         # 'displayName': 'RID: #346267, Lab4233, J#24282 (Controller none), swrelease@pliops.com'
-        info_dict['server'] = re.search(r'Lab\d+', info_dict['displayName']).group(0)
+        try:
+            info_dict['server'] = re.search(r'Lab\d+', info_dict['displayName']).group(0)
+        except AttributeError:
+            info_dict['server'] = "None"
         if bool(info_dict['inProgress']):
             info_dict['result'] = 'Running...'
 
