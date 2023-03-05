@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from jenkins_api import JenkinsAPI
 from config import config
 from test_manager_api import TestManagerAPI
@@ -17,8 +17,9 @@ class DataCollector:
     def _fix_params(self, info_dict):
         info_dict['timestamp_origin'] = info_dict['timestamp']
         info_dict['duration_origin'] = info_dict['duration']
-        info_dict['timestamp'] = datetime.fromtimestamp(info_dict['timestamp']/1000).strftime('%Y-%m-%d %H:%M')
-        info_dict['duration'] = datetime.fromtimestamp(info_dict['duration']/1000).strftime('%H:%M:%S')
+        info_dict['timestamp'] = datetime.fromtimestamp(info_dict['timestamp_origin']/1000).strftime('%Y-%m-%d %H:%M')
+        duration = timedelta(milliseconds=info_dict['duration_origin'])
+        info_dict['duration'] = str(duration)[:-7] if str(duration) != '0:00:00' else str(duration)  # remove milliseconds
         # 'displayName': 'RID: #346267, Lab4233, J#24282 (Controller none), swrelease@pliops.com'
         try:
             info_dict['server'] = re.search(r'Lab\d+', info_dict['displayName']).group(0)
