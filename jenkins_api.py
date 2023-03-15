@@ -28,8 +28,14 @@ class JenkinsAPI:
 
     def _get_data_from_jenkins(self, url):
         response = requests.get(url, auth=self.auth, verify=False)
-        response.raise_for_status()
-        return response.json()
+        try:
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 404:
+                return None
+            else:
+                raise e
 
     def _make_post_request(self, endpoint, data):
         url = self.base_url + endpoint
