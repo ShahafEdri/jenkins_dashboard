@@ -74,11 +74,12 @@ class DataCollector:
         info_dict = self.jenkins_api.get_job_info(job_name=job_name, build_number=build_number)
         if info_dict is None:
             info_dict = {}
+            self._assign_build_params(info_dict, job_name, build_number)
         else:
+            self._assign_build_params(info_dict, job_name, build_number)
             self._fix_params(info_dict)
             self._concat_hold_on_failure(info_dict)
             self._get_parameters_from_jenkins_additional_params(info_dict)
-        self._assign_build_params(info_dict, job_name, build_number)
         params_list = config['job_parameters_display']
         info_dict = {param: info_dict.get(param, '-') for param in params_list}
         return info_dict
