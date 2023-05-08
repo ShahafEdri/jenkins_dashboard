@@ -58,8 +58,10 @@ class App:
             # Clear the screen
             self.stdscr.clear()
 
+            # current time
+            time_str = time.strftime('%a, %d %b %Y %H:%M:%S', time.localtime())
             # Add the current jobs table
-            self.stdscr.addstr(1, 0, "Current jobs:\n")
+            self.stdscr.addstr(1, 0, f"Current jobs:\t\t\t{time_str}\n")
             jobs_data = self.job_manager.get_all_jobs_data()
             t_height, t_width = self.dashboard.show(jobs_data=jobs_data)
             spacing_rows = 2
