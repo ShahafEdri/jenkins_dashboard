@@ -25,8 +25,10 @@ class DataCollector:
             info_dict['server'] = re.search(r'Lab\d+', info_dict['displayName']).group(0)
         except AttributeError:
             info_dict['server'] = "None"
-        if bool(info_dict['inProgress']):
-            info_dict['result'] = 'Running...'
+        if info_dict['server'] == "None":
+            info_dict['result'] = 'Pending'
+        elif bool(info_dict['inProgress']):
+            info_dict['result'] = 'Running..'
 
     def _assign_build_params(self, info, job_name, build_number):
         info["job_name"] = job_name
