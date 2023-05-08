@@ -16,7 +16,8 @@ class App:
         self.action_factory_dict = {
             'add': self.job_manager.add_job_number,
             'remove': self.job_manager.remove_job_number,
-            'unlock': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job_by_build_number,
+            'unlock': {'build': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job_by_build_number,
+                        'node': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job},
             'abort': self.job_manager.data_collector.jenkins_api.stop_job
         }
         
@@ -39,9 +40,15 @@ class App:
         elif command_parts[0] == "quit":
             self.run_flag = False
         elif len(command_parts) == 2:
-            job_number = command_parts[1]
-            action = command_parts[0]
-            self.action_factory(action)(job_number)
+            action, target = command_parts
+            if action in self.action_factory_dict.keys():
+                if action == 'unlock':
+                    if 'lab' in target.lower():
+                        self.action_factory(action)['node'](target)
+                    else:
+                        self.action_factory(action)['build'](target)
+                self.action_factory(action)(target)
+
 
     def render(self):
 
@@ -63,7 +70,7 @@ class App:
 
             # Add the input prompt
             footer_rows =  2
-            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 2, 0, f"you can {'/'.join(self.action_factory_dict.keys())} <job number> action or quit to exit")
+            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 2, 0, f"you can {'/'.join(self.action_factory_dict.keys())} <job number/lab nubmer> action or quit to exit")
             self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 1, 0, "Command: " + self.input_text)
         except curses.error:
             # Terminal has been resized
