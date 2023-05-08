@@ -1,11 +1,24 @@
 {
   "job_name": "request_runner",
   "test_manager_url": "http://test-manager-dev:5000/",
+  
   "job_info_picker": ["inProgress", "duration", "timestamp", "displayName", "result"],
-  "job_parameters_yaml_selector": {
-    "marker": ["execution", "marker"],
-    "validation_tests_branch": ["environment", "validation_tests", "branch"]
-  },
+  
+  "job_parameters_yaml_selector": {"marker": ["execution", "marker"],
+                                   "validation_tests_branch": ["environment", "validation_tests", "branch"]},
   "job_parameters_display": ["build_number", "validation_tests_branch", "marker", "server", "timestamp", "duration", "result"],
-  "job_parameters_display_headers": ["job #", "validation_tests_branch", "marker", "server", "timestamp", "duration", "result"]
+  "job_parameters_display_headers": ["job #", "validation_tests_branch", "marker", "server", "timestamp", "duration", "result"],
+
+
+
+  "job_parameters_display_new":{
+    "job num": {"from_jenkins_json":"build_number"},
+    "validation_tests_branch": {"from_yaml_selector":["environment", "validation_tests", "branch"]},
+    "marker": {"from_yaml_selector":["execution", "marker"]},
+    "server": {"from_jenkins_json":"server"},
+    "timestamp": {"from_jenkins_json":"timestamp"},
+    "duration": {"from_jenkins_json":"duration"},
+    "result": {"from_jenkins_json":"result"}
+  }
+  
 }
