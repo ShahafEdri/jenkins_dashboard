@@ -52,7 +52,7 @@ class TestManagerAPI:
             print(f"An error occurred while checking URL: {e}")
             return "error"
         finally:
-            if driver:
+            if locals().get('driver'):
                 driver.quit()
 
     def is_build_hold_on_failure_on_server(self, server, build_number):
