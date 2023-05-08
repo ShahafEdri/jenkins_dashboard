@@ -22,10 +22,11 @@ class TestManagerAPI:
         chrome_options = Options()
         chrome_options.add_argument("--window-size=1920,1200")
         chrome_options.add_argument("--headless")  # run the browser in the background
-        # failure_element_div_xpath = '//*[@id="DataTables_Table_0"]/tbody/tr[2]'
-        failure_element_div_xpath = '/html/body/div[2]/div[1]/table/tbody/tr[2]/td[2]/font'
-        job_number_xpath = '/html/body/div[2]/div[1]/table/tbody/tr[2]/td[14]/a'
-
+        base = '/html/body/div[2]/div[1]/table/tbody/'
+        element_div_xpath1 = 'tr/'
+        element_div_xpath2 = 'tr[2]/'
+        font = 'td[2]/font'
+        job_number = 'td[14]/a'
         try:
             driver = webdriver.Chrome(options=chrome_options, service=Service(ChromeDriverManager().install()))
             # driver = webdriver.Chrome(options=chrome_options, executable_path="/usr/bin/chromedriver")
@@ -34,20 +35,25 @@ class TestManagerAPI:
             driver.get(url)
 
             # check if the element exists
-            if not driver.find_elements(by=By.XPATH, value=failure_element_div_xpath):
-                return False
+            if not driver.find_elements(by=By.XPATH, value=base+element_div_xpath2+font):
+                if not driver.find_elements(by=By.XPATH, value=base+element_div_xpath1+font):
+                    return False
+                base_xpath = base + element_div_xpath1
+            else:
+                base_xpath = base + element_div_xpath2
 
             # Extract the data from the element
-            failed_div_element = driver.find_element(by=By.XPATH, value=failure_element_div_xpath)
+            failed_div_element = driver.find_element(by=By.XPATH, value=base_xpath+font)
             if failed_div_element.text == "failed":
-                job_name_and_build_number = failed_div_element.find_element(by=By.XPATH, value=job_number_xpath).text
+                job_name_and_build_number = failed_div_element.find_element(by=By.XPATH, value=base_xpath+job_number).text
                 return job_name_and_build_number
 
         except Exception as e:
             print(f"An error occurred while checking URL: {e}")
             return "error"
         finally:
-            driver.quit()
+            if driver:
+                driver.quit()
 
     def is_build_hold_on_failure_on_server(self, server, build_number):
         if self.cache._is_cache_expired(key=server):
