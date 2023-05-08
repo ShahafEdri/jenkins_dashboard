@@ -47,7 +47,8 @@ class App:
                         self.action_factory(action)['node'](target)
                     else:
                         self.action_factory(action)['build'](target)
-                self.action_factory(action)(target)
+                else:
+                    self.action_factory(action)(target)
 
 
     def render(self):
