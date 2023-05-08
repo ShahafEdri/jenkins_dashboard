@@ -19,11 +19,11 @@ class JenkinsAPI:
 
     def _make_get_request(self, endpoint):
         url = self.base_url + endpoint
-        if self.cache._is_cache_expired(url):
+        if self.cache.is_cache_expired(url):
             data = self._get_data_from_jenkins(url)
-            self.cache._cache_data(url, data)
+            self.cache.cache_data(url, data)
         else:
-            data = self.cache._get_cached_data(url)
+            data = self.cache.get_cached_data(url)
         return data
 
     def _get_data_from_jenkins(self, url):

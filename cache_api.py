@@ -7,6 +7,23 @@ class Cache:
     def __init__(self, cache_file, cache_expiry):
         self.cache_file = cache_file
         self.cache_expiry = timedelta(minutes=cache_expiry)
+        self.cache_expity_delete = timedelta(days=1)
+        self._delete_expired_cache()  # delete expired cache when init
+
+    def _delete_expired_cache(self):
+        if os.path.exists(self.cache_file):
+            with open(self.cache_file, 'r') as f:
+                cache = json.load(f)
+                for key in list(cache.keys()):
+                    time = cache[key]['time']
+                    time = datetime.fromtimestamp(time)
+                    if time + self.cache_expity_delete < datetime.now():
+                        del cache[key]
+            with open(self.cache_file, 'w') as f:
+                json.dump(cache, f)
+
+    def cache_data(self, key: str, data) -> None:
+        self._cache_data(key, data)
 
     def _cache_data(self, key: str, data) -> None:
         # save the cache by url as key and time and data as value
@@ -30,6 +47,9 @@ class Cache:
         with open(self.cache_file, 'w') as f:
             json.dump(new_cache, f)
 
+    def get_cached_data(self, key):
+        return self._get_cached_data(key)
+
     def _get_cached_data(self, key):
         try:
             with open(self.cache_file, 'r') as f:
@@ -37,6 +57,9 @@ class Cache:
                 return cache[key]['data']
         except (FileNotFoundError, KeyError):
             return None
+
+    def is_cache_expired(self, key):
+        return self._is_cache_expired(key)
 
     def _is_cache_expired(self, key):
         if os.path.exists(self.cache_file):

@@ -56,11 +56,11 @@ class TestManagerAPI:
                 driver.quit()
 
     def is_build_hold_on_failure_on_server(self, server, build_number):
-        if self.cache._is_cache_expired(key=server):
+        if self.cache.is_cache_expired(key=server):
             status = self._get_build_hold_on_failure_on_server(server, build_number)
-            self.cache._cache_data(key=server, data=status)
+            self.cache.cache_data(key=server, data=status)
         else:
-            status = self.cache._get_cached_data(key=server)
+            status = self.cache.get_cached_data(key=server)
         return status
 
     def _get_build_hold_on_failure_on_server(self, server, build_number):
