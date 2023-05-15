@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import os
 from config import config
 import re
-import yaml
 from cache_api import Cache
 
 
@@ -53,10 +52,10 @@ class JenkinsAPI:
         data = parameters
         return self._make_post_request(endpoint, data)
 
-    def trigger_unlock_node_job_by_build_number(self, build_number):
+    def _trigger_unlock_node_job_by_build_number(self, build_number):
         info_dict = self.get_job_info(build_number)
         info_dict['server'] = re.search(r'Lab\d{4}', info_dict['displayName']).group(0)
-        return self.trigger_unlock_node_job(info_dict['server'])
+        return self._trigger_unlock_node_job(info_dict['server'])
 
     def _trigger_rebuild_job(self, build_number):
         jenkins_dict = self.get_job_info(build_number=build_number)
@@ -110,8 +109,17 @@ class JenkinsAPI:
         parameters_dict = {item['name']: item['value'] for item in parameter_list if(('name' in item )and ('value' in item))}
         return parameters_dict
 
+    def trigger_unlock_node_job(self, lab_or_build_number):
+        if re.match(r'Lab\d{4}', lab_or_build_number):
+            return self._trigger_unlock_node_job(lab_or_build_number)
+        elif re.match(r'\d+', lab_or_build_number):
+            return self._trigger_unlock_node_job_by_build_number(lab_or_build_number)
+        else:
+            raise ValueError(f'lab_or_build_number: {lab_or_build_number} is not a valid value, can be LabXXXX or build number')
 
-    def trigger_unlock_node_job(self, node_name):
+
+
+    def _trigger_unlock_node_job(self, node_name):
         parameters = {
             'NODE': node_name
         }
