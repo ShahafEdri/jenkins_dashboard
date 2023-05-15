@@ -2,7 +2,7 @@ import curses
 import time
 from dashboard import Dashboard
 from job_manager import JobManager
-
+import re
 
 
 class App:
@@ -17,15 +17,15 @@ class App:
             'add': self.job_manager.add_job_number,
             'remove': self.job_manager.remove_job_number,
             'unlock': {'build': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job_by_build_number,
-                        'node': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job},
+                       'node': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job},
             'abort': self.job_manager.data_collector.jenkins_api.stop_job
         }
-        
+
     def action_factory(self, action):
         return self.action_factory_dict[action]
 
     def handle_input(self, c):
-        if c == curses.KEY_BACKSPACE :  # Backspace key
+        if c == curses.KEY_BACKSPACE:  # Backspace key
             self.input_text = self.input_text[:-1]
         elif c in [curses.KEY_ENTER, 10]:  # Enter key
             self.handle_command(self.input_text)
@@ -33,26 +33,51 @@ class App:
         elif 32 <= c <= 126:  # Regular key
             self.input_text += chr(c)
 
+    def print_error_msg(self, msg):
+        """
+        Print error message on the last line
+        :param msg: error message
+        :return: None
+        """
+        # print on the last line
+        self.stdscr.addstr(curses.LINES - 1, 0, msg)
+        self.stdscr.refresh()
+        curses.napms(5000)  # Wait for 5 seconds
+        self.stdscr.addstr(curses.LINES - 1, 0, " " * (curses.COLS-1))
+
     def handle_command(self, command):
+        """
+        Handle the command
+        :param command: command string
+        :return: None
+        """
         command_parts = command.split()
         if command_parts == []:
             pass
-        elif command_parts[0] == "quit":
+        elif command_parts[0] in ["quit", "exit"]:
             self.run_flag = False
         elif len(command_parts) == 2:
             action, target = command_parts
             if action in self.action_factory_dict.keys():
-                if action == 'unlock':
-                    if 'lab' in target.lower():
-                        self.action_factory(action)['node'](target)
-                    else:
+                if re.match(r'[Ll][Aa][Bb]\d{4}', target):  # LABXXXX
+                    self.action_factory(action)['node'](target.title())
+                elif re.match(r'\d+', target):  # Build number
+                    if action == 'unlock':  # unlock build number
                         self.action_factory(action)['build'](target)
+                    else:
+                        self.action_factory(action)(target)
                 else:
-                    self.action_factory(action)(target)
-
+                    self.print_error_msg(f"Invalid target: {target}, valid targets are: LABXXXX or jenkins build number")
+            else:
+                self.print_error_msg(f"Invalid action: {action}, valid actions are: {'/'.join(self.action_factory_dict.keys())}")
+        elif len(command_parts) > 2:
+            self.print_error_msg("Too many arguments inserted, please insert only one action and one target")
 
     def render(self):
-
+        """
+        Render the UI
+        :return: None
+        """
         # Render UI
         try:
             # Clear the screen
@@ -72,8 +97,9 @@ class App:
             self.stdscr.addstr(0, 0, header)
 
             # Add the input prompt
-            footer_rows =  2
-            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 2, 0, f"you can {'/'.join(self.action_factory_dict.keys())} <job number/lab nubmer> action or quit to exit")
+            footer_rows = 2
+            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 2, 0,
+                               f"you can {'/'.join(self.action_factory_dict.keys())} <job number/lab nubmer> or quit to exit")
             self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 1, 0, "Command: " + self.input_text)
         except curses.error:
             # Terminal has been resized
@@ -82,6 +108,11 @@ class App:
         self.stdscr.refresh()
 
     def run(self):
+        """
+        Run the app
+        Entry point of the app
+        :return: None
+        """
         curses.curs_set(0)  # Hide the cursor
         self.stdscr.nodelay(True)  # Set the getch() method to non-blocking
         curses.echo()  # Turn on input echo
@@ -92,8 +123,10 @@ class App:
             self.stdscr.refresh()
             curses.napms(20)  # Wait for 100 ms
 
+
 def main(stdscr):
     app = App(stdscr)
     app.run()
+
 
 curses.wrapper(main)

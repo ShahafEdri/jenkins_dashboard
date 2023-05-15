@@ -54,7 +54,7 @@ class JenkinsAPI:
 
     def trigger_unlock_node_job_by_build_number(self, build_number):
         info_dict = self.get_job_info(build_number)
-        info_dict['server'] = re.search(r'Lab\d+', info_dict['displayName']).group(0)
+        info_dict['server'] = re.search(r'Lab\d{4}', info_dict['displayName']).group(0)
         return self.trigger_unlock_node_job(info_dict['server'])
 
     def trigger_unlock_node_job(self, node_name):
