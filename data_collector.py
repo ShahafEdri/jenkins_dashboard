@@ -25,7 +25,9 @@ class DataCollector:
             info_dict['server'] = re.search(r'Lab\d+', info_dict['displayName']).group(0)
         except AttributeError:
             info_dict['server'] = "None"
-        if info_dict['server'] == "None":
+        if info_dict['result'] == 'ABORTED':
+            info_dict['result'] = 'Aborted'
+        elif info_dict['server'] == "None":
             info_dict['result'] = 'Pending'
         elif bool(info_dict['inProgress']):
             info_dict['result'] = 'Running..'

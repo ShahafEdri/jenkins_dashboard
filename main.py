@@ -18,7 +18,8 @@ class App:
             'remove': self.job_manager.remove_job_number,
             'unlock': {'build': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job_by_build_number,
                        'node': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job},
-            'abort': self.job_manager.data_collector.jenkins_api.stop_job
+            'abort': self.job_manager.data_collector.jenkins_api.stop_job,
+            'rebuild': self.job_manager.start_rebuild_job
         }
 
     def action_factory(self, action):
@@ -33,7 +34,7 @@ class App:
         elif 32 <= c <= 126:  # Regular key
             self.input_text += chr(c)
 
-    def print_error_msg(self, msg):
+    def print_error_msg(self, msg, timeout=5000):
         """
         Print error message on the last line
         :param msg: error message
@@ -42,7 +43,7 @@ class App:
         # print on the last line
         self.stdscr.addstr(curses.LINES - 1, 0, msg)
         self.stdscr.refresh()
-        curses.napms(5000)  # Wait for 5 seconds
+        curses.napms(timeout)  # Default wait for 5 seconds
         self.stdscr.addstr(curses.LINES - 1, 0, " " * (curses.COLS-1))
 
     def handle_command(self, command):
@@ -65,7 +66,9 @@ class App:
                     if action == 'unlock':  # unlock build number
                         self.action_factory(action)['build'](target)
                     else:
-                        self.action_factory(action)(target)
+                        result = self.action_factory(action)(target)
+                        if result==False:
+                            self.print_error_msg(f"action {action} failed on target {target}")
                 else:
                     self.print_error_msg(f"Invalid target: {target}, valid targets are: LABXXXX or jenkins build number")
             else:
