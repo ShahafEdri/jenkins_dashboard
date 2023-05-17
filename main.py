@@ -29,7 +29,7 @@ class App:
     def action_factory(self, action):
         return self.action_factory_dict[action]
 
-    def print_error_msg(self, msg, timeout=5000):
+    def print_error_msg(self, msg, timeout=5):
         """
         Print error message on the last line
         :param msg: error message
@@ -38,7 +38,7 @@ class App:
         # print on the last line
         self.stdscr.addstr(curses.LINES - 1, 0, msg)
         self.stdscr.refresh()
-        curses.napms(timeout)  # Default wait for 5 seconds
+        curses.napms(timeout*1000)  # Default wait for 5 seconds
         self.stdscr.addstr(curses.LINES - 1, 0, " " * (curses.COLS-1))
         self.clear_input()
 
@@ -83,7 +83,7 @@ class App:
                 actions.append(command_parts[0])
             else:
                 self.print_error_msg(f"Invalid command: {command_parts[0]}, valid commands are: {'/'.join(['quit', 'exit'])}")
-        elif len(command_parts) > 2:
+        elif len(command_parts) >= 2:
             for part in command_parts:
                 if self.is_valid_action(part):
                     actions.append(part)
@@ -108,8 +108,8 @@ class App:
             for action in actions:
                 for target in targets:
                     result = self.action_factory(action)(target)
-                    if result == False:
-                        self.print_error_msg(f"action {action} failed on target {target}")
+                    if bool(result) is False:
+                        self.print_error_msg(f"action {action} failed on target {target} with error message: {result}", timeout=1)
 
     def render(self):
         """

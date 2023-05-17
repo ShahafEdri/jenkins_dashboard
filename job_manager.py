@@ -5,6 +5,7 @@ from chrome_controller import ChromeController
 from config import config
 from data_collector import DataCollector
 from web_utils import WebUtils
+from project_errors import ActionError
 
 class JobManager:
     def __init__(self, job_numbers_file='job_numbers.pickle'):
@@ -20,8 +21,13 @@ class JobManager:
         self._save_job_numbers() # Save the job numbers to the file
 
     def remove_job_number(self, job_number):
-        self._job_numbers.remove(job_number)
-        self._save_job_numbers()
+        if job_number in self._job_numbers:
+            self._job_numbers.remove(job_number)
+            self._save_job_numbers()
+            return True
+        else:
+            err_msg = f"Job number {job_number} is not in the jobs list"
+            return ActionError(err_msg)
 
     def get_job_numbers(self):
         return self._job_numbers
