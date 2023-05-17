@@ -54,7 +54,7 @@ class JenkinsAPI:
 
     def _trigger_unlock_node_job_by_build_number(self, build_number):
         info_dict = self.get_job_info(build_number)
-        info_dict['server'] = re.search(r'Lab\d{4}', info_dict['displayName']).group(0)
+        info_dict['server'] = re.search(r'Lab\w+', info_dict['displayName']).group(0)
         return self._trigger_unlock_node_job(info_dict['server'])
 
     def _trigger_rebuild_job(self, build_number):
@@ -109,9 +109,9 @@ class JenkinsAPI:
         parameters_dict = {item['name']: item['value'] for item in parameter_list if(('name' in item )and ('value' in item))}
         return parameters_dict
 
-    def trigger_unlock_node_job(self, lab_or_build_number):
-        if re.match(r'Lab\d{4}', lab_or_build_number):
-            return self._trigger_unlock_node_job(lab_or_build_number)
+    def trigger_unlock_node_job(self, lab_or_build_number: str):
+        if re.match(r'[Ll][Aa][Bb]\w+', lab_or_build_number):
+            return self._trigger_unlock_node_job(lab_or_build_number.title())
         elif re.match(r'\d+', lab_or_build_number):
             return self._trigger_unlock_node_job_by_build_number(lab_or_build_number)
         else:

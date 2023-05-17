@@ -66,7 +66,7 @@ class App:
         elif len(command_parts) == 2:
             action, target = command_parts
             if action in self.action_factory_dict.keys():
-                if re.match(r'[Ll][Aa][Bb]\d{4}', target) or re.match(r'\d+', target):
+                if re.match(r'[Ll][Aa][Bb]\w+', target) or re.match(r'\d+', target):
                     pass
                 else:
                     self.print_error_msg(f"Invalid target: {target}, valid targets are: LABXXXX or jenkins build number ####.. ")
