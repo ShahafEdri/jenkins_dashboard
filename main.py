@@ -44,7 +44,7 @@ class App:
 
     def clear_input(self):  # TODO: change to property
         self._input_text = ""
-    
+
     def get_input_text(self):  # TODO: change to getter
         return self._input_text
 
@@ -55,56 +55,61 @@ class App:
         if c == curses.KEY_BACKSPACE:  # Backspace key
             self.set_input_text(self.get_input_text()[:-1])
         elif c in [curses.KEY_ENTER, 10]:  # Enter key
-            self.validate_command(self.get_input_text())
-            input_text = self.get_input_text()
+            actions, targets = self.validate_and_extract_command(self.get_input_text())
+            self.handle_command(actions, targets)
             self.clear_input()
-            self.handle_command(input_text)
         elif 32 <= c <= 126:  # Regular key
-            self.set_input_text(self.get_input_text()  + chr(c))
+            self.set_input_text(self.get_input_text() + chr(c))
 
-    def validate_command(self, command):
+    def is_valid_action(self, action):
+        return bool(action in self.action_factory_dict.keys())
+
+    def is_valid_target(self, target):
+        return bool(re.match(r'[Ll][Aa][Bb]\w+', target) or re.match(r'\d+', target))
+
+    def validate_and_extract_command(self, command):
         """
         Validate the input command
         :param command: command string
         :return: None
         """
+        actions = []
+        targets = []
         command_parts = command.split()
-        if command_parts == []:
+        if len(command_parts) == 0:
             pass
         elif len(command_parts) == 1:
             if command_parts[0] in ["quit", "exit"]:
-                pass
+                actions.append(command_parts[0])
             else:
                 self.print_error_msg(f"Invalid command: {command_parts[0]}, valid commands are: {'/'.join(['quit', 'exit'])}")
-        elif len(command_parts) == 2:
-            action, target = command_parts
-            if action in self.action_factory_dict.keys():
-                if re.match(r'[Ll][Aa][Bb]\w+', target) or re.match(r'\d+', target):
-                    pass
-                else:
-                    self.print_error_msg(f"Invalid target: {target}, valid targets are: LABXXXX or jenkins build number ####.. ")
-            else:
-                self.print_error_msg(f"Invalid action: {action}, valid actions are: {'/'.join(self.action_factory_dict.keys())}")
         elif len(command_parts) > 2:
-            self.print_error_msg("Too many arguments inserted, please insert only one action and one target")
+            for part in command_parts:
+                if self.is_valid_action(part):
+                    actions.append(part)
+                elif self.is_valid_target(part):
+                    targets.append(part)
+                else:
+                    self.print_error_msg(
+                        f"Invalid command: {part}, valid actions are: <{'/'.join(self.action_factory_dict.keys())}>, valid targets are: <job number/lab name>")
+        return actions, targets
 
-
-    def handle_command(self, command):
+    def handle_command(self, actions, targets):
         """
         Handle the command
         :param command: command string
         :return: None
         """
-        command_parts = command.split()
-        if command_parts == []:
+        if actions == []:
             pass
-        elif command_parts[0] in ["quit", "exit"]:
+        elif actions[0] in ["quit", "exit"]:
             self.run_flag = False
-        elif len(command_parts) == 2:
-            action, target = command_parts
-            result = self.action_factory(action)(target)
-            if result == False:
-                self.print_error_msg(f"action {action} failed on target {target}")
+        else:
+            for action in actions:
+                for target in targets:
+                    result = self.action_factory(action)(target)
+                    if result == False:
+                        self.print_error_msg(f"action {action} failed on target {target}")
 
     def render(self):
         """
