@@ -55,7 +55,7 @@ class JobManager:
         return jobs_dict
     
     def start_rebuild_job(self, job_number):
-        jobs_number_list = self.data_collector.jenkins_api.trigger_rebuild_job(build_number=job_number)
+        jobs_number_list = self.data_collector.jk_api.trigger_rebuild_job(build_number=job_number)
         if jobs_number_list:
             for new_job_number in jobs_number_list:
                 self.add_job_number(str(new_job_number))
@@ -94,5 +94,5 @@ if __name__ == '__main__':
     # print(job_manager.get_job_numbers())
     # print(job_manager.get_jobs_data())
     # job_manager.start_rebuild_job(48592)
-    job_manager.data_collector.jenkins_api.stop_job(48649)
+    job_manager.data_collector.jk_api.stop_job(48649)
     # job_manager.get_all_jobs_data()

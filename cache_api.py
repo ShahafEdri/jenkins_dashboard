@@ -56,13 +56,17 @@ class Cache:
 
     def _is_cache_expired(self, key):
         if os.path.exists(self.cache_file):
-            with open(self.cache_file, 'r') as f:
-                cache = json.load(f)
-                if key in cache:
-                    time = cache[key]['time']
-                    time = datetime.fromtimestamp(time)
-                    if time + self.cache_expiry > datetime.now():
-                        return False
+            try:
+                with open(self.cache_file, 'r') as f:
+                    cache = json.load(f)
+                    if key in cache:
+                        time = cache[key]['time']
+                        time = datetime.fromtimestamp(time)
+                        if time + self.cache_expiry > datetime.now():
+                            return False
+            except json.decoder.JSONDecodeError:
+                # delete cache file if it is not json format
+                os.remove(self.cache_file)
         return True
 
     def __del__(self):

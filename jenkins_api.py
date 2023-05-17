@@ -1,12 +1,13 @@
+import os
+import re
 import time
-import requests
-import json
 import warnings
 from datetime import datetime, timedelta
-import os
-from config import config
-import re
+
+import requests
+
 from cache_api import Cache
+from config import config
 
 
 class JenkinsAPI:
@@ -53,9 +54,12 @@ class JenkinsAPI:
         return self._make_post_request(endpoint, data)
 
     def _trigger_unlock_node_job_by_build_number(self, build_number):
+        server = self.get_server_name(build_number)
+        return self._trigger_unlock_node_job_by_node(server)
+
+    def get_server_name(self, build_number):
         info_dict = self.get_job_info(build_number)
-        info_dict['server'] = re.search(r'Lab\w+', info_dict['displayName']).group(0)
-        return self._trigger_unlock_node_job(info_dict['server'])
+        return re.search(r'Lab\w+', info_dict['displayName']).group(0)
 
     def _trigger_rebuild_job(self, build_number):
         jenkins_dict = self.get_job_info(build_number=build_number)
@@ -109,9 +113,23 @@ class JenkinsAPI:
         parameters_dict = {item['name']: item['value'] for item in parameter_list if(('name' in item )and ('value' in item))}
         return parameters_dict
 
-    def trigger_unlock_node_job(self, lab_or_build_number: str):
+    def __trigger_unlock_node_job(self, lab_or_build_number: str):
+        """
+        NOTE: Unsafe method, running without checking if the node is locked on the build number or not, use function from data_collector.py instead
+        Trigger unlock node job by lab or build number
+
+        Args:
+        - param lab_or_build_number: can be LabXXXX or build number
+        
+        Returns:
+        - True if job was triggered successfully
+        - False if job was not triggered successfully
+
+        Raises:
+        - ValueError if lab_or_build_number is not a valid value
+        """
         if re.match(r'[Ll][Aa][Bb]\w+', lab_or_build_number):
-            return self._trigger_unlock_node_job(lab_or_build_number.title())
+            return self._trigger_unlock_node_job_by_node(lab_or_build_number.title())
         elif re.match(r'\d+', lab_or_build_number):
             return self._trigger_unlock_node_job_by_build_number(lab_or_build_number)
         else:
@@ -119,7 +137,7 @@ class JenkinsAPI:
 
 
 
-    def _trigger_unlock_node_job(self, node_name):
+    def _trigger_unlock_node_job_by_node(self, node_name):
         parameters = {
             'NODE': node_name
         }

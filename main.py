@@ -22,8 +22,8 @@ class App:
         self.action_factory_dict = {
             'add': self.job_manager.add_job_number,
             'remove': self.job_manager.remove_job_number,
-            'unlock': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job,
-            'abort': self.job_manager.data_collector.jenkins_api.stop_job,
+            'unlock': self.job_manager.data_collector.trigger_unlock_node_job,
+            'abort': self.job_manager.data_collector.jk_api.stop_job,
             'rebuild': self.job_manager.start_rebuild_job,
             'open': self.job_manager.open_chrome,
         }
@@ -31,7 +31,7 @@ class App:
     def action_factory(self, action):
         return self.action_factory_dict[action]
 
-    def print_error_msg(self, msg, timeout=3):
+    def print_error_msg(self, msg, timeout=2):
         """
         Print error message on the last line
         :param msg: error message
