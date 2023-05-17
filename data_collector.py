@@ -22,7 +22,7 @@ class DataCollector:
         info_dict['duration'] = str(duration)[:-7] if str(duration) != '0:00:00' else str(duration)  # remove milliseconds
         # 'displayName': 'RID: #346267, Lab4233, J#24282 (Controller none), swrelease@pliops.com'
         try:
-            info_dict['server'] = re.search(r'Lab\d+', info_dict['displayName']).group(0)
+            info_dict['server'] = re.search(r'Lab\w+', info_dict['displayName']).group(0)
         except AttributeError:
             info_dict['server'] = "None"
         if info_dict['result'] == 'ABORTED':
