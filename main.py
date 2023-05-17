@@ -5,6 +5,7 @@ import time
 from chrome_controller import ChromeController
 from dashboard import Dashboard
 from job_manager import JobManager
+from memento_design_pattern import CommandLineInterface
 
 
 class App:
@@ -13,6 +14,7 @@ class App:
         self.job_manager = JobManager()
         self.dashboard = Dashboard(self.stdscr)
         self.chrome = ChromeController()
+        self.cli = CommandLineInterface()
 
         self.run_flag = True
         self._input_text = ""
@@ -29,7 +31,7 @@ class App:
     def action_factory(self, action):
         return self.action_factory_dict[action]
 
-    def print_error_msg(self, msg, timeout=5):
+    def print_error_msg(self, msg, timeout=3):
         """
         Print error message on the last line
         :param msg: error message
@@ -40,7 +42,6 @@ class App:
         self.stdscr.refresh()
         curses.napms(timeout*1000)  # Default wait for 5 seconds
         self.stdscr.addstr(curses.LINES - 1, 0, " " * (curses.COLS-1))
-        self.clear_input()
 
     def clear_input(self):  # TODO: change to property
         self._input_text = ""
@@ -52,14 +53,24 @@ class App:
         self._input_text = text
 
     def handle_input(self, c):
-        if c == curses.KEY_BACKSPACE:  # Backspace key
-            self.set_input_text(self.get_input_text()[:-1])
-        elif c in [curses.KEY_ENTER, 10]:  # Enter key
-            actions, targets = self.validate_and_extract_command(self.get_input_text())
-            self.handle_command(actions, targets)
-            self.clear_input()
-        elif 32 <= c <= 126:  # Regular key
-            self.set_input_text(self.get_input_text() + chr(c))
+        if c != -1:
+            if c == curses.KEY_BACKSPACE:  # Backspace key
+                self.set_input_text(self.get_input_text()[:-1])
+            elif c in [curses.KEY_ENTER, 10]:  # Enter key
+                actions, targets = self.validate_and_extract_command(self.get_input_text())
+                self.cli.record_command(self.get_input_text())
+                self.handle_command(actions, targets)
+                self.clear_input()
+            elif c == curses.KEY_UP:  # Up key
+                self.set_input_text(self.cli.get_previous_command())
+            elif c == curses.KEY_DOWN:  # Down key
+                self.set_input_text(self.cli.get_next_command())
+            elif 32 <= c <= 126:  # Regular key
+                self.set_input_text(self.get_input_text() + chr(c))
+            elif c == 23: # Ctrl + backspace, remove the last word
+                self.set_input_text(self.get_input_text().rsplit(' ', 1)[0])
+            elif c == curses.KEY_EXIT or c == 27:  # Esc key
+                self.run_flag = False
 
     def is_valid_action(self, action):
         return bool(action in self.action_factory_dict.keys())
