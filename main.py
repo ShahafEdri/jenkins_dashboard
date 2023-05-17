@@ -1,8 +1,10 @@
 import curses
+import re
 import time
+
+from chrome_controller import ChromeController
 from dashboard import Dashboard
 from job_manager import JobManager
-import re
 
 
 class App:
@@ -10,15 +12,18 @@ class App:
         self.stdscr = stdscr
         self.job_manager = JobManager()
         self.dashboard = Dashboard(self.stdscr)
+        self.chrome = ChromeController()
+
         self.run_flag = True
-        self.input_text = ""
+        self._input_text = ""
 
         self.action_factory_dict = {
             'add': self.job_manager.add_job_number,
             'remove': self.job_manager.remove_job_number,
             'unlock': self.job_manager.data_collector.jenkins_api.trigger_unlock_node_job,
             'abort': self.job_manager.data_collector.jenkins_api.stop_job,
-            'rebuild': self.job_manager.start_rebuild_job
+            'rebuild': self.job_manager.start_rebuild_job,
+            'open': self.job_manager.open_chrome,
         }
 
     def action_factory(self, action):
@@ -35,21 +40,29 @@ class App:
         self.stdscr.refresh()
         curses.napms(timeout)  # Default wait for 5 seconds
         self.stdscr.addstr(curses.LINES - 1, 0, " " * (curses.COLS-1))
+        self.clear_input()
 
     def clear_input(self):  # TODO: change to property
         self._input_text = ""
+    
+    def get_input_text(self):  # TODO: change to getter
+        return self._input_text
+
+    def set_input_text(self, text):  # TODO: change to setter
+        self._input_text = text
 
     def handle_input(self, c):
         if c == curses.KEY_BACKSPACE:  # Backspace key
-            self.input_text = self.input_text[:-1]
+            self.set_input_text(self.get_input_text()[:-1])
         elif c in [curses.KEY_ENTER, 10]:  # Enter key
-            self.validate_input(self.input_text)
-            self.handle_command(self.input_text)
+            self.validate_command(self.get_input_text())
+            input_text = self.get_input_text()
             self.clear_input()
+            self.handle_command(input_text)
         elif 32 <= c <= 126:  # Regular key
-            self.input_text += chr(c)
+            self.set_input_text(self.get_input_text()  + chr(c))
 
-    def validate_input(self, command):
+    def validate_command(self, command):
         """
         Validate the input command
         :param command: command string
@@ -74,7 +87,6 @@ class App:
                 self.print_error_msg(f"Invalid action: {action}, valid actions are: {'/'.join(self.action_factory_dict.keys())}")
         elif len(command_parts) > 2:
             self.print_error_msg("Too many arguments inserted, please insert only one action and one target")
-        self.clear_input()
 
 
     def handle_command(self, command):
@@ -121,7 +133,7 @@ class App:
             footer_rows = 2
             self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 2, 0,
                                f"you can {'/'.join(self.action_factory_dict.keys())} <job number/lab nubmer> or quit to exit")
-            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 1, 0, "Command: " + self.input_text)
+            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 1, 0, "Command: " + self.get_input_text())
         except curses.error:
             # Terminal has been resized
             curses.resize_term(curses.LINES, curses.COLS)

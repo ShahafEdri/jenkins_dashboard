@@ -1,10 +1,16 @@
 import pickle
-from data_collector import DataCollector
+import re
+
+from chrome_controller import ChromeController
 from config import config
+from data_collector import DataCollector
+from web_utils import WebUtils
 
 class JobManager:
     def __init__(self, job_numbers_file='job_numbers.pickle'):
         self.data_collector = DataCollector()
+        self.chrome = ChromeController()
+        self.web_utils = WebUtils()
         self._job_numbers_file = job_numbers_file
         self._job_numbers = self._load_job_numbers()
 
@@ -50,6 +56,27 @@ class JobManager:
             return True
         else:
             return False
+    
+    def open_chrome(self, job_number_or_url):
+        """
+        Open the job in chrome
+        
+        Args:
+        - job_number_or_url (str): The job number or url to open
+        
+        Returns:
+        - None
+        """
+        if re.match(r'^https?://', job_number_or_url):
+            url = job_number_or_url
+        elif re.match(r'^\d+$', job_number_or_url):
+            url = f'{self.web_utils.get_job_base_path()}/{job_number_or_url}/'
+        elif re.match(r'^Lab\d{4}$', job_number_or_url):
+            url = f'{self.web_utils.get_node_base_path()}/{job_number_or_url}'
+        else:
+            raise ValueError(f'Invalid job number or url: {job_number_or_url}')
+        self.chrome.open(url)
+        return True
 
 if __name__ == '__main__':
     job_manager = JobManager()
