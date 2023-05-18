@@ -4,12 +4,14 @@ import re
 from chrome_controller import ChromeController
 from config import config
 from data_collector import DataCollector
-from web_utils import WebUtils
 from project_errors import ActionError
+from singleton import Singleton
+from web_utils import WebUtils
 
-class JobManager:
+
+class JobManager(metaclass=Singleton):
     def __init__(self, job_numbers_file='job_numbers.pickle'):
-        self.data_collector = DataCollector()
+        self.dc = DataCollector()
         self.chrome = ChromeController()
         self.web_utils = WebUtils()
         self._job_numbers_file = job_numbers_file
@@ -46,7 +48,7 @@ class JobManager:
             return list()
 
     def get_job_data(self, build_number, job_name=config['job_name']):
-        data_dict = self.data_collector.get_build_params(job_name=job_name, build_number=build_number)
+        data_dict = self.dc.get_build_params(job_name=job_name, build_number=build_number)
         return data_dict
 
     def get_all_jobs_data(self, job_name=config['job_name']):
@@ -57,7 +59,7 @@ class JobManager:
         return jobs_dict
     
     def start_rebuild_job(self, job_number):
-        jobs_number_list = self.data_collector.jk_api.trigger_rebuild_job(build_number=job_number)
+        jobs_number_list = self.dc.jk.trigger_rebuild_job(build_number=job_number)
         if jobs_number_list:
             for new_job_number in jobs_number_list:
                 self.add_job_number(str(new_job_number))
@@ -96,5 +98,5 @@ if __name__ == '__main__':
     # print(job_manager.get_job_numbers())
     # print(job_manager.get_jobs_data())
     # job_manager.start_rebuild_job(48592)
-    job_manager.data_collector.jk_api.stop_job(48649)
+    job_manager.dc.jk.stop_job(48649)
     # job_manager.get_all_jobs_data()

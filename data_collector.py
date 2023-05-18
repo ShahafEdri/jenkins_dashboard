@@ -9,7 +9,7 @@ from project_errors import ActionError
 
 class DataCollector:
     def __init__(self):
-        self.jk_api = JenkinsAPI(config['jenkins_url'], config['jenkins_user'], config['jenkins_token'])
+        self.jk = JenkinsAPI(config['jenkins_url'], config['jenkins_user'], config['jenkins_token'])
         self.tst_m_api = TestManagerAPI()
 
     def _is_build_hold_on_failure_on_server(self, server, build_number):
@@ -76,7 +76,7 @@ class DataCollector:
 
     def get_build_params(self, job_name, build_number):
         # add catch exception
-        info_dict = self.jk_api.get_job_info(job_name=job_name, build_number=build_number)
+        info_dict = self.jk.get_job_info(job_name=job_name, build_number=build_number)
         if info_dict is None:
             info_dict = {}
             self._assign_build_params(info_dict, job_name, build_number)
@@ -91,11 +91,11 @@ class DataCollector:
 
     def trigger_unlock_node_job(self, lab_or_build_number: str):
         if re.match(r'[Ll][Aa][Bb]\w+', lab_or_build_number):
-            return self.jk_api._trigger_unlock_node_job_by_node(lab_or_build_number.title())
+            return self.jk._trigger_unlock_node_job_by_node(lab_or_build_number.title())
         elif re.match(r'\d+', lab_or_build_number):
-            server = self.jk_api.get_server_name(build_number=lab_or_build_number)
+            server = self.jk.get_server_name(build_number=lab_or_build_number)
             if self._is_build_hold_on_failure_on_server(server=server, build_number=lab_or_build_number):
-                return self.jk_api._trigger_unlock_node_job_by_build_number(lab_or_build_number)
+                return self.jk._trigger_unlock_node_job_by_build_number(lab_or_build_number)
             return ActionError(f'Build {lab_or_build_number} is not hold on failure on server {server}')
         else:
             raise ValueError(f'lab_or_build_number: {lab_or_build_number} is not a valid value, can be LabXXXX or build number')

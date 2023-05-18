@@ -1,35 +1,21 @@
+from singleton import Singleton
 import curses
-import re
 import time
 
-from chrome_controller import ChromeController
+from action_factory import Action_Factory
 from dashboard import Dashboard
+from input_handler import InputHandler
 from job_manager import JobManager
-from memento_design_pattern import CommandLineInterface
 
 
-class App:
+class App(metaclass=Singleton):
     def __init__(self, stdscr):
         self.stdscr = stdscr
-        self.job_manager = JobManager()
-        self.dashboard = Dashboard(self.stdscr)
-        self.chrome = ChromeController()
-        self.cli = CommandLineInterface()
+        self.jm = JobManager()
+        self.dsb = Dashboard(self.stdscr)
+        self.ih = InputHandler()
 
         self.run_flag = True
-        self._input_text = ""
-
-        self.action_factory_dict = {
-            'add': self.job_manager.add_job_number,
-            'remove': self.job_manager.remove_job_number,
-            'unlock': self.job_manager.data_collector.trigger_unlock_node_job,
-            'abort': self.job_manager.data_collector.jk_api.stop_job,
-            'rebuild': self.job_manager.start_rebuild_job,
-            'open': self.job_manager.open_chrome,
-        }
-
-    def action_factory(self, action):
-        return self.action_factory_dict[action]
 
     def print_error_msg(self, msg, timeout=2):
         """
@@ -42,85 +28,6 @@ class App:
         self.stdscr.refresh()
         curses.napms(timeout*1000)  # Default wait for 5 seconds
         self.stdscr.addstr(curses.LINES - 1, 0, " " * (curses.COLS-1))
-
-    def clear_input(self):  # TODO: change to property
-        self._input_text = ""
-
-    def get_input_text(self):  # TODO: change to getter
-        return self._input_text
-
-    def set_input_text(self, text):  # TODO: change to setter
-        self._input_text = text
-
-    def handle_input(self, c):
-        if c != -1:
-            if c == curses.KEY_BACKSPACE:  # Backspace key
-                self.set_input_text(self.get_input_text()[:-1])
-            elif c in [curses.KEY_ENTER, 10]:  # Enter key
-                actions, targets = self.validate_and_extract_command(self.get_input_text())
-                self.cli.record_command(self.get_input_text())
-                self.handle_command(actions, targets)
-                self.clear_input()
-            elif c == curses.KEY_UP:  # Up key
-                self.set_input_text(self.cli.get_previous_command())
-            elif c == curses.KEY_DOWN:  # Down key
-                self.set_input_text(self.cli.get_next_command())
-            elif 32 <= c <= 126:  # Regular key
-                self.set_input_text(self.get_input_text() + chr(c))
-            elif c == 23: # Ctrl + backspace, remove the last word
-                self.set_input_text(self.get_input_text().rsplit(' ', 1)[0])
-            elif c == curses.KEY_EXIT or c == 27:  # Esc key
-                self.run_flag = False
-
-    def is_valid_action(self, action):
-        return bool(action in self.action_factory_dict.keys())
-
-    def is_valid_target(self, target):
-        return bool(re.match(r'[Ll][Aa][Bb]\w+', target) or re.match(r'\d+', target))
-
-    def validate_and_extract_command(self, command):
-        """
-        Validate the input command
-        :param command: command string
-        :return: None
-        """
-        actions = []
-        targets = []
-        command_parts = command.split()
-        if len(command_parts) == 0:
-            pass
-        elif len(command_parts) == 1:
-            if command_parts[0] in ["quit", "exit"]:
-                actions.append(command_parts[0])
-            else:
-                self.print_error_msg(f"Invalid command: {command_parts[0]}, valid commands are: {'/'.join(['quit', 'exit'])}")
-        elif len(command_parts) >= 2:
-            for part in command_parts:
-                if self.is_valid_action(part):
-                    actions.append(part)
-                elif self.is_valid_target(part):
-                    targets.append(part)
-                else:
-                    self.print_error_msg(
-                        f"Invalid command: {part}, valid actions are: <{'/'.join(self.action_factory_dict.keys())}>, valid targets are: <job number/lab name>")
-        return actions, targets
-
-    def handle_command(self, actions, targets):
-        """
-        Handle the command
-        :param command: command string
-        :return: None
-        """
-        if actions == []:
-            pass
-        elif actions[0] in ["quit", "exit"]:
-            self.run_flag = False
-        else:
-            for action in actions:
-                for target in targets:
-                    result = self.action_factory(action)(target)
-                    if bool(result) is False:
-                        self.print_error_msg(f"action {action} failed on target {target} with error message: {result}", timeout=1)
 
     def render(self):
         """
@@ -136,8 +43,8 @@ class App:
             time_str = time.strftime('%a, %d %b %Y %H:%M:%S', time.localtime())
             # Add the current jobs table
             self.stdscr.addstr(1, 0, f"Current jobs:\t\t\t{time_str}\n")
-            jobs_data = self.job_manager.get_all_jobs_data()
-            t_height, t_width = self.dashboard.show(jobs_data=jobs_data)
+            jobs_data = self.jm.get_all_jobs_data()
+            t_height, t_width = self.dsb.show(jobs_data=jobs_data)
             spacing_rows = 2
 
             # Add a header
@@ -148,8 +55,8 @@ class App:
             # Add the input prompt
             footer_rows = 2
             self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 2, 0,
-                               f"you can {'/'.join(self.action_factory_dict.keys())} <job number/lab nubmer> or quit to exit")
-            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 1, 0, "Command: " + self.get_input_text())
+                               f"you can {'/'.join(Action_Factory.get_actions())} <job number/lab nubmer> or quit to exit")
+            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 1, 0, "Command: " + self.ih.get_input_text())
         except curses.error:
             # Terminal has been resized
             curses.resize_term(curses.LINES, curses.COLS)
@@ -167,10 +74,13 @@ class App:
         curses.echo()  # Turn on input echo
         while self.run_flag:
             c = self.stdscr.getch()  # Non-blocking input
-            self.handle_input(c)
+            errors = self.ih.handle_input(c)
+            if bool(errors):
+                for error in errors:
+                    self.print_error_msg(error, timeout=1)
             self.render()
             self.stdscr.refresh()
-            curses.napms(20)  # Wait for 100 ms
+            curses.napms(10)  # Wait for 100 ms
 
 
 def main(stdscr):
