@@ -8,28 +8,29 @@ class CommandLineInterface:
 
     def record_command(self, command):
         if (command == "") or (self.get_command() == command):
-            self.set_index_to_last()
             return
         self.command_history.append(command)
-        self.current_index = len(self.command_history) - 1
+        self.set_index_to_last()
 
     def get_previous_command(self):
-        command = self.get_command()
-        if self.current_index >= 0:
+        if self.current_index > 0:
             self.current_index -= 1
-        return command
+        return self.get_command()
 
     def get_next_command(self):
-        if self.current_index < len(self.command_history) - 1:
+        if self.current_index <= len(self.command_history) - 1:
             self.current_index += 1
-            return self.get_command()
+        return self.get_command()
+
+    def get_command(self, index=None):
+        if index is None:
+            index = self.current_index
+        if 0 <= index <= (len(self.command_history)-1):
+            return self.command_history[index]
         return ""
 
-    def get_command(self):
-        return self.command_history[self.current_index] if self.current_index >= 0 else ""
-
     def set_index_to_last(self):
-        self.current_index = len(self.command_history) - 1
+        self.current_index = len(self.command_history)
 
 # Caretaker: CLIController
 
