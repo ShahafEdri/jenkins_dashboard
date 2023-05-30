@@ -17,7 +17,18 @@ class JobManager(metaclass=Singleton):
         self._job_numbers_file = job_numbers_file
         self._job_numbers = self._load_job_numbers()
 
+
     def add_job_number(self, job_number):
+        if self.web_utils.is_valid_url(job_number):
+            job_number, _ = self.web_utils.extract_build_number_and_job_name(job_number)
+            return self._add_job_number(job_number)
+        elif re.match(r'^\d+$', job_number):
+            return self._add_job_number(job_number)
+        else:
+            err_msg = f"Job number {job_number} is not valid"
+            return ActionError(err_msg)
+
+    def _add_job_number(self, job_number):
         self._job_numbers.append(job_number)  # Add the job number to the set
         self._job_numbers = list(set(self._job_numbers))  # Remove duplicates
         self._job_numbers = sorted(self._job_numbers)  # Sort the job numbers

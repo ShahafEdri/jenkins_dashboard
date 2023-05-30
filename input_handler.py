@@ -3,12 +3,14 @@ import re
 
 from action_factory import Action_Factory
 from memento_design_pattern import CommandLineInterface
-
+from web_utils import WebUtils
 
 class InputHandler():
     def __init__(self):
         self._input_text = ""
         self.cli = CommandLineInterface()
+        self.web_utils = WebUtils()
+        self.run_flag = None
 
     def clear_input(self):  # TODO: change to property
         self._input_text = ""
@@ -44,7 +46,7 @@ class InputHandler():
         return bool(action in Action_Factory.get_actions())
 
     def is_valid_target(self, target):
-        return bool(re.match(r'[Ll][Aa][Bb]\w+', target) or re.match(r'\d+', target))
+        return bool(re.match(r'[Ll][Aa][Bb]\w+', target) or re.match(r'\d+', target) or self.web_utils.is_valid_url(target))
 
     def validate_and_extract_command(self, command):
         """
