@@ -8,6 +8,7 @@ class Cache:
         self.cache_file = cache_file
         self.cache_expiry = timedelta(minutes=cache_expiry)
         self.cache_expity_delete = timedelta(days=1)
+        self._delete_expired_cache()
 
     def _delete_expired_cache(self):
         if os.path.exists(self.cache_file):
@@ -68,9 +69,6 @@ class Cache:
                 # delete cache file if it is not json format
                 os.remove(self.cache_file)
         return True
-
-    def __del__(self):
-        self._delete_expired_cache()
 
     def __repr__(self):
         return f'Cache(cache_file={self.cache_file}, cache_expiry={self.cache_expiry})'
