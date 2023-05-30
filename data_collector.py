@@ -27,11 +27,11 @@ class DataCollector:
         except AttributeError:
             info_dict['server'] = "None"
         if info_dict['result'] == 'ABORTED':
-            info_dict['result'] = 'Aborted'
-        elif info_dict['server'] == "None":
-            info_dict['result'] = 'Pending'
+            pass
+        elif info_dict['server'] == "None" and info_dict['result'] != 'FAILURE':
+            info_dict['result'] = 'PENDING'
         elif bool(info_dict['inProgress']):
-            info_dict['result'] = 'Running..'
+            info_dict['result'] = 'RUNNING'
 
     def _assign_build_params(self, info, job_name, build_number):
         info["job_name"] = job_name

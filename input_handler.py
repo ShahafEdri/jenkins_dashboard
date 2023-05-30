@@ -26,9 +26,10 @@ class InputHandler():
             if c == curses.KEY_BACKSPACE:  # Backspace key
                 self.set_input_text(self.get_input_text()[:-1])
             elif c in [curses.KEY_ENTER, 10]:  # Enter key
-                actions, targets = self.validate_and_extract_command(self.get_input_text())
+                actions, targets, errors = self.validate_and_extract_command(self.get_input_text())
                 self.cli.record_command(self.get_input_text())
-                errors = self.handle_command(actions, targets)
+                if not errors:
+                    errors = self.handle_command(actions, targets)
                 self.clear_input()
                 return errors
             elif c == curses.KEY_UP:  # Up key
@@ -76,13 +77,14 @@ class InputHandler():
                         f"Invalid command: {part}, valid actions are: <{'/'.join(Action_Factory.get_actions())}>, valid targets are: <job number/lab name>")
         return actions, targets, errors
 
-    def handle_command(self, actions, targets):
+    def handle_command(self, actions, targets, errors=[]):
         """
         Handle the command
         :param command: command string
         :return: None
         """
-        errors = []
+        if errors:
+            return errors
         if actions == []:
             pass
         elif actions[0] in ["quit", "exit"]:

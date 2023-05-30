@@ -15,7 +15,7 @@ class App(metaclass=Singleton):
         self.dsb = Dashboard(self.stdscr)
         self.ih = InputHandler()
 
-        self.run_flag = True
+        self.ih.run_flag = True
 
     def print_error_msg(self, msg, timeout=2):
         """
@@ -72,7 +72,7 @@ class App(metaclass=Singleton):
         curses.curs_set(0)  # Hide the cursor
         self.stdscr.nodelay(True)  # Set the getch() method to non-blocking
         curses.echo()  # Turn on input echo
-        while self.run_flag:
+        while self.ih.run_flag:
             c = self.stdscr.getch()  # Non-blocking input
             errors = self.ih.handle_input(c)
             if bool(errors):
