@@ -1,7 +1,11 @@
 import curses
+
+import pandas as pd
 from tabulate import tabulate
-from job_manager import JobManager
+
 from config import config
+from job_manager import JobManager
+
 
 class Dashboard:
     def __init__(self, stdscr=None):
@@ -22,7 +26,16 @@ class Dashboard:
     def get_table_string(self, jobs_data):
         data = self._jobs_dict_to_list_of_lists(jobs_data)
         headers = config['job_parameters_display_headers']
-        return tabulate(data, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
+        # index is the job number
+        df = pd.DataFrame(data, columns=headers, index=jobs_data.keys())
+        # drop the index column
+        df = df.reset_index(drop=True)
+        # sort by marker
+        if config.get("sort_by_header", None):
+            df = df.sort_values(by=config["sort_by_header"], ascending=False)
+        # outline table with | and - and center align
+        return tabulate(df, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
+        # return tabulate(data, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
 
     def show(self, jobs_data):
         table_str = self.get_table_string(jobs_data)

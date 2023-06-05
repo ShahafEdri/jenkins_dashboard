@@ -9,7 +9,7 @@
   "job_parameters_display": ["build_number", "validation_tests_branch", "marker", "server", "timestamp", "duration", "result"],
   "job_parameters_display_headers": ["job #", "validation_tests_branch", "marker", "server", "timestamp", "duration", "result"],
 
-
+  "sort_by_header": ["marker", "timestamp"],
 
   "job_parameters_display_new":{
     "job num": {"from_jenkins_json":"build_number"},

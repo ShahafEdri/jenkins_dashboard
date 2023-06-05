@@ -29,7 +29,7 @@ class InputHandler():
                 actions, targets, errors = self.validate_and_extract_command(self.get_input_text())
                 self.cli.record_command(self.get_input_text())
                 if not errors:
-                    errors = self.handle_command(actions, targets)
+                    errors = self.handle_command(actions, targets, errors)
                 self.clear_input()
                 return errors
             elif c == curses.KEY_UP:  # Up key
@@ -77,7 +77,7 @@ class InputHandler():
                         f"Invalid command: {part}, valid actions are: <{'/'.join(Action_Factory.get_actions())}>, valid targets are: <job number/lab name>")
         return actions, targets, errors
 
-    def handle_command(self, actions, targets, errors=[]):
+    def handle_command(self, actions, targets, errors):
         """
         Handle the command
         :param command: command string
@@ -94,5 +94,5 @@ class InputHandler():
                 for target in targets:
                     result = Action_Factory(action)(target)
                     if bool(result) is False:
-                        errors.append(f"action {action} failed on target {target} with error message: {result}")
+                        errors.append(f"action {action} failed on target {target} with error message: '{result}'")
         return errors
