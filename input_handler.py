@@ -4,6 +4,7 @@ import re
 from action_factory import Action_Factory
 from memento_design_pattern import CommandLineInterface
 from web_utils import WebUtils
+from job_manager import JobManager
 
 class InputHandler():
     def __init__(self):
@@ -11,6 +12,7 @@ class InputHandler():
         self.cli = CommandLineInterface()
         self.web_utils = WebUtils()
         self.run_flag = None
+        self.jm = JobManager()
 
     def clear_input(self):  # TODO: change to property
         self._input_text = ""
@@ -92,6 +94,11 @@ class InputHandler():
         else:
             for action in actions:
                 for target in targets:
+                    if re.match(r'\d{1,2}', target):
+                        target, errors = self.jm.get_job_by_index(target)
+                        if errors:
+                            errors.append(f"action {action} failed on target {target} with error message: '{errors}'")
+                            continue
                     result = Action_Factory(action)(target)
                     if bool(result) is False:
                         errors.append(f"action {action} failed on target {target} with error message: '{result}'")

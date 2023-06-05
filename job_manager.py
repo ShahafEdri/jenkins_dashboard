@@ -22,7 +22,7 @@ class JobManager(metaclass=Singleton):
         if self.web_utils.is_valid_url(job_number):
             job_number, _ = self.web_utils.extract_build_number_and_job_name(job_number)
             return self._add_job_number(job_number)
-        elif re.match(r'^\d+$', job_number):
+        elif re.match(r'^\d{3,}$', job_number):
             return self._add_job_number(job_number)
         else:
             err_msg = f"Job number {job_number} is not valid"
@@ -34,6 +34,18 @@ class JobManager(metaclass=Singleton):
         self._job_numbers = sorted(self._job_numbers)  # Sort the job numbers
         self._save_job_numbers() # Save the job numbers to the file
         return True
+
+    def get_job_by_index(self, index):
+        if re.match(r'^\d{,2}$', index):
+            index = int(index)
+            if index < len(self._job_numbers):
+                return self._job_numbers[index], None
+            else:
+                err_msg = f"Job number {index} is not in the jobs list"
+                return index, ActionError(err_msg)
+        else:
+            err_msg = f"Job number {index} is not valid"
+            return index, ActionError(err_msg)
 
     def remove_job_number(self, job_number):
         if job_number in self._job_numbers:

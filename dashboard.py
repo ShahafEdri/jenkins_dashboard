@@ -32,7 +32,7 @@ class Dashboard:
         df = df.reset_index(drop=True)
         # sort by marker
         if config.get("sort_by_header", None):
-            df = df.sort_values(by=config["sort_by_header"], ascending=False)
+            df = df.sort_values(by=config["sort_by_header"], ascending=True)
         # outline table with | and - and center align
         return tabulate(df, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
         # return tabulate(data, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
