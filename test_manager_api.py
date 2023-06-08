@@ -1,10 +1,6 @@
-from datetime import timedelta
-import datetime
-import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
 from config import config
@@ -28,7 +24,7 @@ class TestManagerAPI:
         font = 'td[2]/font'
         job_number = 'td[14]/a'
         try:
-            driver = webdriver.Chrome(options=chrome_options, service=Service(ChromeDriverManager().install()))
+            driver = webdriver.Chrome(options=chrome_options, executable_path=ChromeDriverManager().install())
             # driver = webdriver.Chrome(options=chrome_options, executable_path="/usr/bin/chromedriver")
             # Get the URL
             url = f"{self.base_url_node}/{server}"

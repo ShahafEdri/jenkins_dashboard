@@ -16,16 +16,17 @@ class Dashboard:
         if jobs_data:
             for job_number, job_params in jobs_data.items():
                 job_row_data = []
-                for param in config['job_parameters_display']:
+                mlist = [k if "inner_name" not in v else v["inner_name"] for k,v  in config['job_parameters'].items()]
+                for param in mlist:
                     job_row_data.append(job_params.get(param))
                 data.append(job_row_data)
             return data
         else:
-            return [["-"]*len(config['job_parameters_display_headers'])]
+            return [["-"]*len(config["job_parameters"].keys())]
         
     def get_table_string(self, jobs_data):
         data = self._jobs_dict_to_list_of_lists(jobs_data)
-        headers = config['job_parameters_display_headers']
+        headers = config["job_parameters"].keys()
         # index is the job number
         df = pd.DataFrame(data, columns=headers, index=jobs_data.keys())
         # drop the index column

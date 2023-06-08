@@ -59,9 +59,9 @@ class DataCollector:
         except:
             return None
 
-    def _parameters_picker(self, info_dict, additional_params):
-        config["job_parameters_yaml_selector"]
-        for param, nest_path_list in config["job_parameters_yaml_selector"].items():
+    def _parameters_picker_from_yaml(self, info_dict, additional_params):
+        keys_with_from_yaml_selector_string = {key:value["from_yaml_selector"] for key, value in config["job_parameters"].items() if "from_yaml_selector" in value}
+        for param, nest_path_list in keys_with_from_yaml_selector_string.items():
             info_dict[param] = additional_params
             for nest in nest_path_list:
                 try:
@@ -70,9 +70,9 @@ class DataCollector:
                     info_dict[param] = None
                     break
 
-    def _get_parameters_from_jenkins_additional_params(self, info_dict):
+    def _get_parameters_from_jenkins_additional_params_and_yml(self, info_dict):
         additional_params = self._get_additional_params_from_yaml(info_dict)
-        self._parameters_picker(info_dict, additional_params)
+        self._parameters_picker_from_yaml(info_dict, additional_params)
 
     def get_build_params(self, job_name, build_number):
         # add catch exception
@@ -84,8 +84,9 @@ class DataCollector:
             self._assign_build_params(info_dict, job_name, build_number)
             self._fix_params(info_dict)
             self._concat_hold_on_failure(info_dict)
-            self._get_parameters_from_jenkins_additional_params(info_dict)
-        params_list = config['job_parameters_display']
+            self._get_parameters_from_jenkins_additional_params_and_yml(info_dict)
+        mlist = [k if "inner_name" not in v else v["inner_name"] for k,v  in config['job_parameters'].items()]
+        params_list = mlist
         info_dict = {param: info_dict.get(param, '-') for param in params_list}
         return info_dict
 

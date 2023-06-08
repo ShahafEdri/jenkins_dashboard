@@ -6,6 +6,7 @@ from memento_design_pattern import CommandLineInterface
 from web_utils import WebUtils
 from job_manager import JobManager
 
+
 class InputHandler():
     def __init__(self):
         self._input_text = ""
@@ -13,6 +14,12 @@ class InputHandler():
         self.web_utils = WebUtils()
         self.run_flag = None
         self.jm = JobManager()
+        self.valid_input = {
+            "action": '/'.join(Action_Factory.get_actions()),
+            "target": '/'.join(['job number', 'lab name', 'index']),
+            "exit": '/'.join(['quit', 'exit']),
+            "example": "action target1 target2 ...",
+        }
 
     def clear_input(self):  # TODO: change to property
         self._input_text = ""
@@ -67,16 +74,21 @@ class InputHandler():
             if command_parts[0] in ["quit", "exit"]:
                 actions.append(command_parts[0])
             else:
-                errors.append(f"Invalid command: {command_parts[0]}, valid commands are: {'/'.join(['quit', 'exit'])}")
+                errors.append(f"Invalid command: {command_parts[0]}, valid commands are: {self.valid_input['exit']}")
         elif len(command_parts) >= 2:
             for part in command_parts:
                 if self.is_valid_action(part):
                     actions.append(part)
                 elif self.is_valid_target(part):
+                    if re.match(r'\d{1,2}', part):
+                        part, error = self.jm.get_job_by_index(part)
+                        if error:
+                            errors.append(f"Invalid target: {part}, returned with error {error}, valid targets are: <{self.valid_input['target']}>")
+                            continue
                     targets.append(part)
                 else:
                     errors.append(
-                        f"Invalid command: {part}, valid actions are: <{'/'.join(Action_Factory.get_actions())}>, valid targets are: <job number/lab name>")
+                        f"Invalid command: {part}, valid actions are: <{self.valid_input['action']}>, valid targets are: <{self.valid_input['target']}>")
         return actions, targets, errors
 
     def handle_command(self, actions, targets, errors):
@@ -94,11 +106,6 @@ class InputHandler():
         else:
             for action in actions:
                 for target in targets:
-                    if re.match(r'\d{1,2}', target):
-                        target, errors = self.jm.get_job_by_index(target)
-                        if errors:
-                            errors.append(f"action {action} failed on target {target} with error message: '{errors}'")
-                            continue
                     result = Action_Factory(action)(target)
                     if bool(result) is False:
                         errors.append(f"action {action} failed on target {target} with error message: '{result}'")
