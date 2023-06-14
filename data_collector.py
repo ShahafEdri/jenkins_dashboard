@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta
 from jenkins_api import JenkinsAPI
 from config import config
-from test_manager_api import TestManagerAPI
+from test_manager_api_v2 import TestManagerAPI
 import yaml
 from project_errors import ActionError
 from general_utils import timeit

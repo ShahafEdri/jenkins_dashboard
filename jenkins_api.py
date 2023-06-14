@@ -4,54 +4,24 @@ import time
 import warnings
 from datetime import datetime, timedelta
 
-import requests
-
-from cache_api import Cache
 from config import config
+from web_utils import WebUtils
 
 
 class JenkinsAPI:
     def __init__(self, base_url, username, password):
         self.base_url = base_url
-        self.auth = (username, password)
-        self.cache_file = 'cache_jenkins.json'
-        self.cache = Cache(self.cache_file, 1)
+        self.web_utils = WebUtils()
         warnings.filterwarnings('ignore')
-
-    def _make_get_request(self, endpoint, force=False):
-        url = self.base_url + endpoint
-        if self.cache.is_cache_expired(url) or force:
-            data = self._get_data_from_jenkins(url)
-            self.cache[url] = data
-        else:
-            data = self.cache[url]
-        return data
-
-    def _get_data_from_jenkins(self, url):
-        response = requests.get(url, auth=self.auth, verify=False)
-        try:
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.HTTPError as e:
-            if response.status_code == 404:
-                return None
-            else:
-                raise e
-
-    def _make_post_request(self, endpoint, data):
-        url = self.base_url + endpoint
-        response = requests.post(url, auth=self.auth, data=data, verify=False)
-        response.raise_for_status()
-        return response.status_code in [200, 201]  # 201 is the status code for successful POST request
 
     def get_job_info(self, build_number, job_name=config["job_name"]):
         endpoint = f'/job/{job_name}/{build_number}/api/json'
-        return self._make_get_request(endpoint)
+        return self.web_utils._make_get_request(self.base_url+endpoint)
 
     def trigger_job(self, job_name, parameters):
         endpoint = f'/job/{job_name}/buildWithParameters'
         data = parameters
-        return self._make_post_request(endpoint, data)
+        return self.web_utils._make_post_request(self.base_url+endpoint, data)
 
     def _trigger_unlock_node_job_by_build_number(self, build_number):
         server = self.get_server_name(build_number)
@@ -135,8 +105,6 @@ class JenkinsAPI:
         else:
             raise ValueError(f'lab_or_build_number: {lab_or_build_number} is not a valid value, can be LabXXXX or build number')
 
-
-
     def _trigger_unlock_node_job_by_node(self, node_name):
         parameters = {
             'NODE': node_name
@@ -145,11 +113,11 @@ class JenkinsAPI:
 
     def stop_job(self,  build_number, job_name=config['job_name']):
         endpoint = f'/job/{job_name}/{build_number}/stop'
-        return self._make_post_request(endpoint, None)
+        return self.web_utils._make_post_request(self.base_url+endpoint, None)
 
     def get_job_builds(self, job_name=config['job_name'], force=False):
         endpoint = f'/job/{job_name}/api/json'
-        job_info = self._make_get_request(endpoint, force=force)
+        job_info = self.web_utils._make_get_request(self.base_url+endpoint, force=force)
         return job_info['builds']
     
     def get_last_build_number(self, job_name=config['job_name']):

@@ -1,9 +1,41 @@
 import re
+import requests
 
 from config import config
 from project_errors import ActionError
+from cache_api import Cache
 
 class WebUtils():
+    def __init__(self):
+        self.cache_file = 'cache_data.json'
+        self.cache = Cache(self.cache_file, config["cache_timeout"])
+
+    def _make_post_request(self, url, data):
+        auth = (config['jenkins_user'], config['jenkins_token']) if "jenkins" in url else None
+        response = requests.post(url, auth=auth, data=data, verify=False)
+        response.raise_for_status()
+        return response.status_code in [200, 201]  # 201 is the status code for successful POST request
+
+    def _make_get_request(self, url, force=False):
+        if self.cache.is_cache_expired(url) or force:
+            data = self._get_json_response_from_url(url)
+            self.cache[url] = data
+        else:
+            data = self.cache[url]
+        return data
+
+    def _get_json_response_from_url(self, url):
+        auth = (config['jenkins_user'], config['jenkins_token']) if "jenkins" in url else None
+        response = requests.get(url, auth=auth, verify=False)
+        try:
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 404:
+                return None
+            else:
+                raise e
+
     def get_node_base_path(self):
         return f"{config['test_manager_url']}/nodes/"
     
