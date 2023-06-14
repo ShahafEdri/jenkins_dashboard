@@ -7,6 +7,7 @@ from dashboard import Dashboard
 from input_handler import InputHandler
 from job_manager import JobManager
 from general_utils import timeit
+from collections import Counter
 
 class App(metaclass=Singleton):
     def __init__(self, stdscr):
@@ -14,7 +15,7 @@ class App(metaclass=Singleton):
         self.jm = JobManager()
         self.dsb = Dashboard(self.stdscr)
         self.ih = InputHandler()
-
+        self.prev_string = ""
         self.ih.run_flag = True
 
     def print_error_msg(self, msg, timeout=2):
@@ -35,29 +36,30 @@ class App(metaclass=Singleton):
         Render the UI
         :return: None
         """
+        # add static previous string to check if we need to render
         # Render UI
         try:
-            # Clear the screen
-            self.stdscr.clear()
-
             # current time
-            time_str = time.strftime('%a, %d %b %Y %H:%M:%S', time.localtime())
             # Add the current jobs table
-            self.stdscr.addstr(1, 0, f"Current jobs:\t\t\t{time_str}\n")
+            time_str = time.strftime('%a, %d %b %Y %H:%M:%S', time.localtime())
             jobs_data = self.jm.get_all_jobs_data()
-            t_height, t_width = self.dsb.show(jobs_data=jobs_data)
-            spacing_rows = 2
+            t_shape, t_str = self.dsb.show(jobs_data=jobs_data, print_flag=False)
+            t_height, t_width = t_shape
+            results = Counter(job_info["result"] for job_info in jobs_data.values())
+            string = f"""{" Job Manager ".center(t_width, "=")}
+Current jobs:\t\t\t{time_str}
+{t_str}
+Summary: {dict(results)}
 
-            # Add a header
-            header_rows = 2
-            header = " Job Manager ".center(t_width, "=")
-            self.stdscr.addstr(0, 0, header)
+You can {'/'.join(Action_Factory.get_actions())} <job number>, unlock <lab number>, exit/quit
+Command: {self.ih.get_input_text()}
+"""
 
-            # Add the input prompt
-            footer_rows = 2
-            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 2, 0,
-                               f"you can {'/'.join(Action_Factory.get_actions())} <job number/lab nubmer> or quit to exit")
-            self.stdscr.addstr(t_height + sum([header_rows, footer_rows, spacing_rows]) - 1, 0, "Command: " + self.ih.get_input_text())
+            if self.prev_string != string:
+                self.stdscr.clear()
+                self.stdscr.addstr(0, 0, string)
+                self.prev_string = string
+
         except curses.error:
             # Terminal has been resized
             curses.resize_term(curses.LINES, curses.COLS)

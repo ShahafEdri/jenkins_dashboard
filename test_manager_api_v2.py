@@ -17,30 +17,24 @@ class TestManagerAPI:
                 hof_status = response["requests"][0]["status_info"]
                 if hof_status == "hold-on-failure":
                     return response["requests"][0]["build_number"]
-                elif hof_status == None:
-                    return "error"
                 else:
                     return False
             else:
                 return False
+        elif response is None:
+            return None
         else:
             return "error"
 
-        
-
     def is_build_hold_on_failure_on_server(self, server, build_number):
-        if self.cache.is_cache_expired(key=server):
-            status = self._get_build_hold_on_failure_on_server(server, build_number)
-            self.cache[server] = status
-        else:
-            status = self.cache[server]
+        status = self._get_build_hold_on_failure_on_server(server, build_number)
         return status
 
     from general_utils import timeit
     @timeit
     def _get_build_hold_on_failure_on_server(self, server, build_number):
         fetched_build_number = self.is_server_hold_on_failure(server)
-        if fetched_build_number == "error" or fetched_build_number is None:
+        if fetched_build_number == "error":
             return "error"
         elif not fetched_build_number:
             return False

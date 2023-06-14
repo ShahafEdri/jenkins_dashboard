@@ -38,14 +38,15 @@ class Dashboard:
         return tabulate(df, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
         # return tabulate(data, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
 
-    def show(self, jobs_data):
+    def show(self, jobs_data, print_flag=True):
         table_str = self.get_table_string(jobs_data)
-        if self.stdscr:
-            self.stdscr.addstr(table_str)
-        else:
-            print(table_str)
-        # return table_height and table_width
-        return len(table_str.splitlines()), len(table_str.splitlines()[0])
+        if print_flag:
+            if self.stdscr:
+                self.stdscr.addstr(table_str)
+            else:
+                print(table_str)
+        table_shape = len(table_str.splitlines()), len(table_str.splitlines()[0])
+        return table_shape, table_str
 
 if __name__ == '__main__':
     job_manager = JobManager()
