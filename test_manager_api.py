@@ -12,7 +12,7 @@ class TestManagerAPI:
         self.base_url = config["test_manager_url"]
         self.base_url_node = self.base_url + "/nodes"
         self.cache_file = 'cache_test_manager.json'
-        self.cache = Cache(self.cache_file, 3)
+        self.cache = Cache(self.cache_file, 3*60)
 
     def is_server_hold_on_failure(self, server):
         chrome_options = Options()

@@ -1,6 +1,7 @@
 {
   "job_name": "request_runner",
   "test_manager_url": "http://test-manager-dev:5000/",
+  "cache_timeout": 300,
   
   "job_parameters":{
     "job": {"inner_name":"build_number","from_jenkins_json":"build_number"},
@@ -9,7 +10,8 @@
     "server": {"from_jenkins_json":"server"},
     "timestamp": {"from_jenkins_json":"timestamp"},
     "duration": {"from_jenkins_json":"duration"},
-    "result": {"from_jenkins_json":"result"}
+    "result": {"from_jenkins_json":"result"},
+    "spider_branch": {"from_yaml_selector":["install", "spider", "branch"]}
   },
 
   "sort_by_header": ["marker", "timestamp"]

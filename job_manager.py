@@ -7,13 +7,15 @@ from data_collector import DataCollector
 from project_errors import ActionError
 from singleton import Singleton
 from web_utils import WebUtils
-
+from cache_api import Cache
 
 class JobManager(metaclass=Singleton):
     def __init__(self, job_numbers_file='job_numbers.pickle'):
         self.dc = DataCollector()
         self.chrome = ChromeController()
         self.web_utils = WebUtils()
+        self.cache_file = 'cache_job_manager.json'
+        self.cache = Cache(self.cache_file, 20)
         self._job_numbers_file = job_numbers_file
         self._job_numbers = self._load_job_numbers()
 
@@ -79,8 +81,12 @@ class JobManager(metaclass=Singleton):
     def get_all_jobs_data(self, job_name=config['job_name']):
         jobs_dict = {}
         for job_number in self._job_numbers:
-            data_dict = self.get_job_data(build_number=job_number, job_name=job_name)
-            jobs_dict[job_number] = data_dict
+            if self.cache.is_cache_expired(job_number):
+                data = self.get_job_data(build_number=job_number, job_name=job_name)
+                self.cache[job_number] = data
+            else:
+                data = self.cache[job_number]
+            jobs_dict[job_number] = data
         return jobs_dict
     
     def start_rebuild_job(self, job_number):

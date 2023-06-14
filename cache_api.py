@@ -6,19 +6,23 @@ import os
 class Cache:
     def __init__(self, cache_file, cache_expiry):
         self.cache_file = cache_file
-        self.cache_expiry = timedelta(minutes=cache_expiry)
+        self.cache_expiry = timedelta(seconds=cache_expiry)
         self.cache_expity_delete = timedelta(days=1)
         self._delete_expired_cache()
 
     def _delete_expired_cache(self):
         if os.path.exists(self.cache_file):
             with open(self.cache_file, 'r') as f:
-                cache = json.load(f)
-                for key in list(cache.keys()):
-                    time = cache[key]['time']
-                    time = datetime.fromtimestamp(time)
-                    if time + self.cache_expity_delete < datetime.now():
-                        del cache[key]
+                file_content = f.read()
+                try:
+                    cache = json.loads(file_content)
+                    for key in list(cache.keys()):
+                        time = cache[key]['time']
+                        time = datetime.fromtimestamp(time)
+                        if time + self.cache_expity_delete < datetime.now():
+                            del cache[key]
+                except json.decoder.JSONDecodeError:
+                    cache = {}
             with open(self.cache_file, 'w') as f:
                 json.dump(cache, f)
 
