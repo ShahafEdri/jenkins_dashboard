@@ -6,7 +6,7 @@ from action_factory import Action_Factory
 from dashboard import Dashboard
 from input_handler import InputHandler
 from job_manager import JobManager
-
+from general_utils import timeit
 
 class App(metaclass=Singleton):
     def __init__(self, stdscr):
@@ -29,6 +29,7 @@ class App(metaclass=Singleton):
         curses.napms(timeout*1000)  # Default wait for 5 seconds
         self.stdscr.addstr(curses.LINES - 1, 0, " " * (curses.COLS-1))
 
+    @timeit
     def render(self):
         """
         Render the UI
@@ -80,7 +81,7 @@ class App(metaclass=Singleton):
                     self.print_error_msg(error, timeout=1)
             self.render()
             self.stdscr.refresh()
-            curses.napms(10)  # Wait for 100 ms
+            curses.napms(1)  # Wait for 100 ms
 
 
 def main(stdscr):

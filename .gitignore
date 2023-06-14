@@ -4,3 +4,4 @@ venv/
 __pycache__/
 *.bak
 cache*.json
+log.log

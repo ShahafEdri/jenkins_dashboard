@@ -52,6 +52,8 @@ class Cache:
         except (FileNotFoundError, KeyError):
             return None
 
+    from general_utils import timeit
+    @timeit
     def is_cache_expired(self, key):
         return self._is_cache_expired(key)
 

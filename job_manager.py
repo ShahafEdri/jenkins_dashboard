@@ -74,6 +74,8 @@ class JobManager(metaclass=Singleton):
         data_dict = self.dc.get_build_params(job_name=job_name, build_number=build_number)
         return data_dict
 
+    from general_utils import timeit
+    @timeit
     def get_all_jobs_data(self, job_name=config['job_name']):
         jobs_dict = {}
         for job_number in self._job_numbers:

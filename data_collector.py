@@ -5,7 +5,7 @@ from config import config
 from test_manager_api import TestManagerAPI
 import yaml
 from project_errors import ActionError
-
+from general_utils import timeit
 
 class DataCollector:
     def __init__(self):
@@ -15,6 +15,7 @@ class DataCollector:
     def _is_build_hold_on_failure_on_server(self, server, build_number):
         return self.tst_m_api.is_build_hold_on_failure_on_server(build_number=build_number, server=server)
 
+    @timeit
     def _fix_params(self, info_dict):
         info_dict['timestamp_origin'] = info_dict['timestamp']
         info_dict['duration_origin'] = info_dict['duration']
@@ -33,10 +34,12 @@ class DataCollector:
         elif bool(info_dict['inProgress']):
             info_dict['result'] = 'RUNNING*'
 
+    @timeit
     def _assign_build_params(self, info, job_name, build_number):
         info["job_name"] = job_name
         info["build_number"] = build_number
 
+    @timeit
     def _concat_hold_on_failure(self, info_dict):
         if info_dict['result'] == 'FAILURE':
             response = self._is_build_hold_on_failure_on_server(info_dict['server'], info_dict['build_number'])
@@ -70,6 +73,7 @@ class DataCollector:
                     info_dict[param] = None
                     break
 
+    @timeit
     def _get_parameters_from_jenkins_additional_params_and_yml(self, info_dict):
         additional_params = self._get_additional_params_from_yaml(info_dict)
         self._parameters_picker_from_yaml(info_dict, additional_params)
