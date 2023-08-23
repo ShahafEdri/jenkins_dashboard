@@ -10,7 +10,7 @@ from web_utils import WebUtils
 from cache_api import Cache
 
 class JobManager(metaclass=Singleton):
-    def __init__(self, job_numbers_file='job_numbers.pickle'):
+    def __init__(self, job_numbers_file=config['jobs_file_name']):
         self.dc = DataCollector()
         self.chrome = ChromeController()
         self.web_utils = WebUtils()

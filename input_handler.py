@@ -33,7 +33,7 @@ class InputHandler():
 
     def handle_input(self, c):
         if c != -1:
-            if c == curses.KEY_BACKSPACE:  # Backspace key
+            if c in [curses.KEY_BACKSPACE]:  # Backspace key
                 self.set_input_text(self.get_input_text()[:-1])
             elif c in [curses.KEY_ENTER, 10]:  # Enter key
                 actions, targets, errors = self.validate_and_extract_command(self.get_input_text())
@@ -42,15 +42,15 @@ class InputHandler():
                     errors = self.handle_command(actions, targets, errors)
                 self.clear_input()
                 return errors
-            elif c == curses.KEY_UP:  # Up key
+            elif c in [curses.KEY_UP]:  # Up key
                 self.set_input_text(self.cli.get_previous_command())
-            elif c == curses.KEY_DOWN:  # Down key
+            elif c in [curses.KEY_DOWN]:  # Down key
                 self.set_input_text(self.cli.get_next_command())
             elif 32 <= c <= 126:  # Regular key
                 self.set_input_text(self.get_input_text() + chr(c))
-            elif c == 23:  # Ctrl + backspace, remove the last word
+            elif c in [23]:  # Ctrl + backspace, remove the last word
                 self.set_input_text(self.get_input_text().rsplit(' ', 1)[0])
-            elif c == curses.KEY_EXIT or c == 27:  # Esc key
+            elif c in [curses.KEY_EXIT, 27]:  # Esc key
                 self.run_flag = False
 
     def is_valid_action(self, action):

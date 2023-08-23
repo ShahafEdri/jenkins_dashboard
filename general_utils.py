@@ -3,6 +3,7 @@
 import time
 import functools
 from log import logger
+import argparse
 
 
 def timeit(func):
@@ -21,3 +22,8 @@ def timeit(func):
         return res
 
     return wrapper
+
+def validate_pickle_file_name(value):
+    if not value.endswith('.pickle'):
+        raise argparse.ArgumentTypeError("File name must end with '.pickle'")
+    return value

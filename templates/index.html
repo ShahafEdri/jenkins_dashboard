@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Job Information</title>
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+</head>
+<body>
+    <h1>Job Information</h1>
+    <table id="job-table">
+        {{ job_df | safe }}
+    </table>
+
+    <h2>Send Command to Backend</h2>
+    <form action="/execute" method="POST">
+        <input type="text" name="command" placeholder="Enter command...">
+        <input type="submit" value="Submit">
+    </form>
+    
+    <p id="response">{{ response }}</p>
+
+    <script src="script.js"></script>
+</body>
+</html>

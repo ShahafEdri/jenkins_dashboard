@@ -31,7 +31,7 @@ class WebUtils():
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as e:
-            if response.status_code == 404:
+            if response.status_code in [404, 500]:
                 return None
             else:
                 raise e
@@ -50,7 +50,7 @@ class WebUtils():
 
         for example: https://pl-jenkins01:8443/job/request_runner/50518/
         """
-        return re.match(r'^(https?://.+?)/job/([^/]+)/(\d+)/?$', url)
+        return re.match(r'^(https?://.+?)/job/([^/]+)/(\d+)', url)
 
     def extract_build_number_and_job_name(self, url):
         """
@@ -61,7 +61,7 @@ class WebUtils():
         for example: https://pl-jenkins01:8443/job/request_runner/50518/
         """
         if self.is_valid_url(url):
-            match = re.match(r'^(https?://.+?)/job/([^/]+)/(\d+)/?$', url)
+            match = re.match(r'^(https?://.+?)/job/([^/]+)/(\d+)', url)
             if match:
                 return match.group(3), match.group(2)
             else:

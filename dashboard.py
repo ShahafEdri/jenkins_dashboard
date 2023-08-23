@@ -23,8 +23,8 @@ class Dashboard:
             return data
         else:
             return [["-"]*len(config["job_parameters"].keys())]
-        
-    def get_table_string(self, jobs_data):
+
+    def format_data_to_df(self, jobs_data):
         data = self._jobs_dict_to_list_of_lists(jobs_data)
         headers = config["job_parameters"].keys()
         # index is the job number
@@ -34,10 +34,15 @@ class Dashboard:
         # sort by marker
         if config.get("sort_by_header", None):
             df = df.sort_values(by=config["sort_by_header"], ascending=True)
-        # outline table with | and - and center align
-        return tabulate(df, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
-        # return tabulate(data, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers))
+        return df
 
+    def get_table_string(self, jobs_data):
+        df = self.format_data_to_df(jobs_data)
+        headers = config["job_parameters"].keys()
+        # outline table with | and - and center align
+        # return tabulate(df, headers=headers, tablefmt='orgtbl', colalign=("center",)*len(headers), showindex=True)
+        return tabulate(df, headers=headers, tablefmt='orgtbl', showindex=True)
+        
     def show(self, jobs_data, print_flag=True):
         table_str = self.get_table_string(jobs_data)
         if print_flag:

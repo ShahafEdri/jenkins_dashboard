@@ -14,9 +14,13 @@ class TestManagerAPI:
         response = self.web_utils._make_get_request(f"{self.base_url}/api/v1/nodes/{server}")
         if response:
             if response["requests"]:
-                hof_status = response["requests"][0]["status_info"]
+                # find list index of "request_runner" job in ["requests"][{list_index}]["job_name"]
+                request_runner_index = next((index for (index, d) in enumerate(response["requests"]) if d["job_name"] == "request_runner"), None)
+                if request_runner_index is None:
+                    return False
+                hof_status = response["requests"][request_runner_index]["status_info"]
                 if hof_status == "hold-on-failure":
-                    return response["requests"][0]["build_number"]
+                    return response["requests"][request_runner_index]["build_number"]
                 else:
                     return False
             else:
